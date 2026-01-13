@@ -1,0 +1,29 @@
+diff --git a/patcheval/evaluation/run_evaluation.py b/patcheval/evaluation/run_evaluation.py
+index 080e25b..12ff949 100644
+--- a/patcheval/evaluation/run_evaluation.py
++++ b/patcheval/evaluation/run_evaluation.py
+@@ -47,6 +47,7 @@ class DockerManager:
+         """
+         image_name = f"ghcr.io/anonymous2578-data/{cve.lower()}:latest"
+         volumes = {}
++        tmp_file_path = None
+         def _create_patch_file(llm_patch):
+             fd, tmp_file_path = tempfile.mkstemp(suffix='.patch')
+             with os.fdopen(fd, 'w', encoding='utf-8') as tmp_file:
+@@ -72,11 +73,11 @@ class DockerManager:
+         except Exception as e:
+             self.logger.debug(f"Failed to start container: {e}", extra={"cve": self.cve})
+             return None
+-        finally:
+-            # clean up temp file
+-            if tmp_file_path and os.path.exists(tmp_file_path):
+-                os.unlink(tmp_file_path)
+-                tmp_file_path = None
++        # finally:
++        #     # clean up temp file
++        #     if tmp_file_path and os.path.exists(tmp_file_path):
++        #         os.unlink(tmp_file_path)
++        #         tmp_file_path = None
+ 
+     def rm_container(self, container_name: str) -> None:
+         """Stop and remove the container if it exists. Also remove temp patch file if exists."""
