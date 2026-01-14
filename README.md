@@ -97,4 +97,4 @@ python run_evaluation.py \
 ## Notes
 
 - Runs only include CVEs with PatchEval Docker images.
-- Results are deterministic with `--temperature 0.0`.
+
