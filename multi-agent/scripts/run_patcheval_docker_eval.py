@@ -28,7 +28,11 @@ import tqdm
 
 # Load .env file if present
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).parent.parent / ".env")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
+
+
+# load_dotenv(Path(__file__).parent.parent / ".env")
 
 # Add parent directory to path for multi-agent imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -688,7 +692,7 @@ def main():
         available_samples = filtered_samples
 
     # Sort for deterministic limiting
-    available_samples = sorted(available_samples, key=lambda s: s.cve_id)
+    available_samples = sorted(available_samples, key=lambda s: s.cve_id, reverse=True)
 
     # Limit if requested
     if args.max_items and len(available_samples) > args.max_items:
