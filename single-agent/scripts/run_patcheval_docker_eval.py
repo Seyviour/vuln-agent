@@ -154,7 +154,7 @@ def save_result(
     output_dir: Path,
     patch: Optional[str] = None,
 ) -> None:
-    sample_dir = output_dir / result.sample_id
+    sample_dir = output_dir / result.sample_id.replace("-", "_")
     sample_dir.mkdir(parents=True, exist_ok=True)
 
     summary = {
@@ -263,7 +263,7 @@ def run_single_agent_in_container(
 
     cve_log_handler = None
     attached_loggers: list[logging.Logger] = []
-    logs_dir = output_dir / cve / "logs"
+    logs_dir = output_dir / cve.replace("-", "_") / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)
     try:
         cve_log_file = logs_dir / "agent_execution.log"
@@ -378,7 +378,7 @@ def main() -> None:
             logger.info("Skipped %s samples with existing results", skipped)
         samples = filtered_samples
 
-    samples = sorted(samples, key=lambda s: s.cve_id)
+    samples = sorted(samples, key=lambda s: s.cve_id, reverse=True)
 
     if args.max_items and len(samples) > args.max_items:
         samples = samples[:args.max_items]
