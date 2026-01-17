@@ -1,0 +1,1371 @@
+2026-01-16 21:54:45,335 - orchestrator - INFO - Starting single-agent patching run for CVE-2022-24065
+2026-01-16 21:54:45,335 - orchestrator - INFO - Starting single-agent patching run for CVE-2022-24065
+2026-01-16 21:54:45,337 - orchestrator - INFO - Using container: single_agent_cve-2022-24065_b7ffe5d2, work_dir: /workspace/cookiecutter
+2026-01-16 21:54:45,337 - orchestrator - INFO - Using container: single_agent_cve-2022-24065_b7ffe5d2, work_dir: /workspace/cookiecutter
+2026-01-16 21:54:45,338 - src.agents.base - INFO - SingleAgent - LLM call prompt (4115 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2022-24065
+**CWE:** ['CWE-94', 'CWE-77', 'CWE-78']
+**Affected File:** cookiecutter/vcs.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+    """Clone a repo to the current directory.
+
+    :param repo_url: Repo URL of unknown type.
+    :param checkout: The branch, tag or commit ID to checkout after clone.
+    :param clone_to_dir: The directory to clone to.
+                         Defaults to the current directory.
+    :param no_input: Suppress all user prompts when calling via API.
+    :returns: str with path to the new directory of the repository.
+    """
+    # Ensure that clone_to_dir exists
+    clone_to_dir = os.path.expanduser(clone_to_dir)
+    make_sure_path_exists(clone_to_dir)
+
+    # identify the repo_type
+    repo_type, repo_url = identify_repo(repo_url)
+
+    # check that the appropriate VCS for the repo_type is installed
+    if not is_vcs_installed(repo_type):
+        msg = f"'{repo_type}' is not installed."
+        raise VCSNotInstalled(msg)
+
+    repo_url = repo_url.rstrip('/')
+    repo_name = os.path.split(repo_url)[1]
+    if repo_type == 'git':
+        repo_name = repo_name.split(':')[-1].rsplit('.git')[0]
+        repo_dir = os.path.normpath(os.path.join(clone_to_dir, repo_name))
+    if repo_type == 'hg':
+        repo_dir = os.path.normpath(os.path.join(clone_to_dir, repo_name))
+    logger.debug(f'repo_dir is {repo_dir}')
+
+    if os.path.isdir(repo_dir):
+        clone = prompt_and_delete(repo_dir, no_input=no_input)
+    else:
+        clone = True
+
+    if clone:
+        try:
+            subprocess.check_output(  # nosec
+                [repo_type, 'clone', repo_url],
+                cwd=clone_to_dir,
+                stderr=subprocess.STDOUT,
+            )
+            if checkout is not None:
+                subprocess.check_output(  # nosec
+                    [repo_type, 'checkout', checkout],
+                    cwd=repo_dir,
+                    stderr=subprocess.STDOUT,
+                )
+        except subprocess.CalledProcessError as clone_error:
+            output = clone_error.output.decode('utf-8')
+            if 'not found' in output.lower():
+                raise RepositoryNotFound(
+                    'The repository {} could not be found, '
+                    'have you made a typo?'.format(repo_url)
+                )
+            if any(error in output for error in BRANCH_ERRORS):
+                raise RepositoryCloneFailed(
+                    'The {} branch of repository {} could not found, '
+                    'have you made a typo?'.format(checkout, repo_url)
+                )
+            logger.error('git clone failed with error: %s', output)
+            raise
+
+    return repo_dir
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 21:54:45,338 - src.agents.base - INFO - SingleAgent - LLM call prompt (4115 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2022-24065
+**CWE:** ['CWE-94', 'CWE-77', 'CWE-78']
+**Affected File:** cookiecutter/vcs.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+    """Clone a repo to the current directory.
+
+    :param repo_url: Repo URL of unknown type.
+    :param checkout: The branch, tag or commit ID to checkout after clone.
+    :param clone_to_dir: The directory to clone to.
+                         Defaults to the current directory.
+    :param no_input: Suppress all user prompts when calling via API.
+    :returns: str with path to the new directory of the repository.
+    """
+    # Ensure that clone_to_dir exists
+    clone_to_dir = os.path.expanduser(clone_to_dir)
+    make_sure_path_exists(clone_to_dir)
+
+    # identify the repo_type
+    repo_type, repo_url = identify_repo(repo_url)
+
+    # check that the appropriate VCS for the repo_type is installed
+    if not is_vcs_installed(repo_type):
+        msg = f"'{repo_type}' is not installed."
+        raise VCSNotInstalled(msg)
+
+    repo_url = repo_url.rstrip('/')
+    repo_name = os.path.split(repo_url)[1]
+    if repo_type == 'git':
+        repo_name = repo_name.split(':')[-1].rsplit('.git')[0]
+        repo_dir = os.path.normpath(os.path.join(clone_to_dir, repo_name))
+    if repo_type == 'hg':
+        repo_dir = os.path.normpath(os.path.join(clone_to_dir, repo_name))
+    logger.debug(f'repo_dir is {repo_dir}')
+
+    if os.path.isdir(repo_dir):
+        clone = prompt_and_delete(repo_dir, no_input=no_input)
+    else:
+        clone = True
+
+    if clone:
+        try:
+            subprocess.check_output(  # nosec
+                [repo_type, 'clone', repo_url],
+                cwd=clone_to_dir,
+                stderr=subprocess.STDOUT,
+            )
+            if checkout is not None:
+                subprocess.check_output(  # nosec
+                    [repo_type, 'checkout', checkout],
+                    cwd=repo_dir,
+                    stderr=subprocess.STDOUT,
+                )
+        except subprocess.CalledProcessError as clone_error:
+            output = clone_error.output.decode('utf-8')
+            if 'not found' in output.lower():
+                raise RepositoryNotFound(
+                    'The repository {} could not be found, '
+                    'have you made a typo?'.format(repo_url)
+                )
+            if any(error in output for error in BRANCH_ERRORS):
+                raise RepositoryCloneFailed(
+                    'The {} branch of repository {} could not found, '
+                    'have you made a typo?'.format(checkout, repo_url)
+                )
+            logger.error('git clone failed with error: %s', output)
+            raise
+
+    return repo_dir
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 21:54:46,413 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:46,413 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:46,414 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 1,
+  "end_line": 60
+}
+2026-01-16 21:54:46,414 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 1,
+  "end_line": 60
+}
+2026-01-16 21:54:46,672 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:46,672 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:47,571 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:47,571 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:47,571 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 61,
+  "end_line": 120
+}
+2026-01-16 21:54:47,571 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 61,
+  "end_line": 120
+}
+2026-01-16 21:54:47,697 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:47,697 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:48,600 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:48,600 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:48,600 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 121,
+  "end_line": 180
+}
+2026-01-16 21:54:48,600 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 121,
+  "end_line": 180
+}
+2026-01-16 21:54:48,744 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:48,744 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:49,801 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 21:54:49,801 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 21:54:49,801 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "clone",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:54:49,801 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "clone",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:54:49,990 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:54:49,990 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:54:51,109 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:51,109 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:54:51,110 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 1,
+  "end_line": 20
+}
+2026-01-16 21:54:51,110 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 1,
+  "end_line": 20
+}
+2026-01-16 21:54:51,259 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:54:51,259 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:10,189 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 21:55:10,189 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 21:55:10,190 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "old_code": "def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):\n    \"\"\"Clone a repo to the current directory.\n\n    :param repo_url: Repo URL of unknown type.\n    :param checkout: The branch, tag or commit ID to checkout after clone.\n    :param clone_to_dir: The directory to clone to.\n                         Defaults to the current directory.\n    :param no_input: Suppress all user prompts when calling via API.\n    :returns: str with path to the new directory of the repository.\n    \"\"\"\n    # Ensure that clone_to_dir exists\n    clone_to_dir = os.path.expanduser(clone_to_dir)\n    make_sure_path_exists(clone_to_dir)\n\n    # identify the repo_type\n    repo_type, repo_url = identify_repo(repo_url)\n\n    # check that the appropriate VCS for the repo_type is installed\n    if not is_vcs_installed(repo_type):\n        msg = f\"'{repo_type}' is not installed.\"\n        raise VCSNotInstalled(msg)\n\n    repo_url = repo_url.rstrip('/')\n    repo_name = os.path.split(repo_url)[1]",
+  "new_code": "def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):\n    \"\"\"Clone a repo to the current directory.\n\n    :param repo_url: Repo URL of unknown type.\n    :param checkout: The branch, tag or commit ID to checkout after clone.\n    :param clone_to_dir: The directory to clone to.\n                         Defaults to the current directory.\n    :param no_input: Suppress all user prompts when calling via API.\n    :returns: str with path to the new directory of the repository.\n    \"\"\"\n    # Input validation to prevent argument injection\n    if repo_url.strip().startswith('-'):\n        raise ValueError(\"Invalid repo_url: must not start with a dash ('-') to prevent argument injection.\")\n    if checkout is not None and str(checkout).strip().startswith('-'):\n        raise ValueError(\"Invalid checkout value: must not start with a dash ('-') to prevent argument injection.\")\n\n    # Ensure that clone_to_dir exists\n    clone_to_dir = os.path.expanduser(clone_to_dir)\n    make_sure_path_exists(clone_to_dir)\n\n    # identify the repo_type\n    repo_type, repo_url = identify_repo(repo_url)\n\n    # check that the appropriate VCS for the repo_type is installed\n    if not is_vcs_installed(repo_type):\n        msg = f\"'{repo_type}' is not installed.\"\n        raise VCSNotInstalled(msg)\n\n    repo_url = repo_url.rstrip('/')\n    repo_name = os.path.split(repo_url)[1]",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 21:55:10,190 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "old_code": "def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):\n    \"\"\"Clone a repo to the current directory.\n\n    :param repo_url: Repo URL of unknown type.\n    :param checkout: The branch, tag or commit ID to checkout after clone.\n    :param clone_to_dir: The directory to clone to.\n                         Defaults to the current directory.\n    :param no_input: Suppress all user prompts when calling via API.\n    :returns: str with path to the new directory of the repository.\n    \"\"\"\n    # Ensure that clone_to_dir exists\n    clone_to_dir = os.path.expanduser(clone_to_dir)\n    make_sure_path_exists(clone_to_dir)\n\n    # identify the repo_type\n    repo_type, repo_url = identify_repo(repo_url)\n\n    # check that the appropriate VCS for the repo_type is installed\n    if not is_vcs_installed(repo_type):\n        msg = f\"'{repo_type}' is not installed.\"\n        raise VCSNotInstalled(msg)\n\n    repo_url = repo_url.rstrip('/')\n    repo_name = os.path.split(repo_url)[1]",
+  "new_code": "def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):\n    \"\"\"Clone a repo to the current directory.\n\n    :param repo_url: Repo URL of unknown type.\n    :param checkout: The branch, tag or commit ID to checkout after clone.\n    :param clone_to_dir: The directory to clone to.\n                         Defaults to the current directory.\n    :param no_input: Suppress all user prompts when calling via API.\n    :returns: str with path to the new directory of the repository.\n    \"\"\"\n    # Input validation to prevent argument injection\n    if repo_url.strip().startswith('-'):\n        raise ValueError(\"Invalid repo_url: must not start with a dash ('-') to prevent argument injection.\")\n    if checkout is not None and str(checkout).strip().startswith('-'):\n        raise ValueError(\"Invalid checkout value: must not start with a dash ('-') to prevent argument injection.\")\n\n    # Ensure that clone_to_dir exists\n    clone_to_dir = os.path.expanduser(clone_to_dir)\n    make_sure_path_exists(clone_to_dir)\n\n    # identify the repo_type\n    repo_type, repo_url = identify_repo(repo_url)\n\n    # check that the appropriate VCS for the repo_type is installed\n    if not is_vcs_installed(repo_type):\n        msg = f\"'{repo_type}' is not installed.\"\n        raise VCSNotInstalled(msg)\n\n    repo_url = repo_url.rstrip('/')\n    repo_name = os.path.split(repo_url)[1]",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 21:55:10,349 - src.tools.edit_code - INFO - EditCodeTool: Writing 4364 chars to cookiecutter/vcs.py (match_type=exact)
+2026-01-16 21:55:10,349 - src.tools.edit_code - INFO - EditCodeTool: Writing 4364 chars to cookiecutter/vcs.py (match_type=exact)
+2026-01-16 21:55:10,503 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 21:55:10,503 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 21:55:11,376 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 21:55:11,376 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 21:55:11,377 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "cookiecutter/vcs.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 21:55:11,377 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "cookiecutter/vcs.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 21:55:11,724 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/vcs/test_clone.py']
+2026-01-16 21:55:11,724 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/vcs/test_clone.py']
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   include_paths: ['cookiecutter/vcs.py']
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   include_paths: ['cookiecutter/vcs.py']
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/vcs/test_clone.py']
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/vcs/test_clone.py']
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'cookiecutter/vcs.py' ':(exclude)tests/vcs/test_clone.py'
+2026-01-16 21:55:11,725 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'cookiecutter/vcs.py' ':(exclude)tests/vcs/test_clone.py'
+2026-01-16 21:55:11,863 - src.tools.run_test - INFO -   Generated patch: 905 bytes, 17 lines
+2026-01-16 21:55:11,863 - src.tools.run_test - INFO -   Generated patch: 905 bytes, 17 lines
+2026-01-16 21:55:11,863 - src.tools.run_test - INFO -   Patch content:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..fbed78a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+
+2026-01-16 21:55:11,863 - src.tools.run_test - INFO -   Patch content:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..fbed78a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+
+2026-01-16 21:55:11,966 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:11,966 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:12,531 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 21:55:12,531 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 21:55:12,632 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..fbed78a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+
+
+2026-01-16 21:55:12,632 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..fbed78a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+
+
+2026-01-16 21:55:13,609 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 21:55:13,609 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 21:55:13,609 - src.tools.run_test - INFO - fix-run.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 5 items
+
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-https://github.com/hello/world.git-world] PASSED [ 20%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] FAILED [ 40%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@host:gitoliterepo-gitoliterepo] PASSED [ 60%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@gitlab.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [ 80%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@github.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [100%]
+
+=================================== FAILURES ===================================
+__ test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] __
+
+self = <MagicMock name='check_output' spec='function' id='140737402751536'>
+args = (['hg', 'checkout', '--', 'foobar'],)
+kwargs = {'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2}
+expected = ('', <BoundArguments (popenargs=(['hg', 'checkout', '--', 'foobar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2})>)
+actual = [('', <BoundArguments (popenargs=(['hg', 'clone', 'https://bitbucket.org/foo/bar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir', 'stderr': -2})>), ('', <BoundArguments (popenargs=(['hg', 'checkout', 'foobar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2})>)]
+cause = None
+expected_string = "check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2)"
+
+    def assert_any_call(self, /, *args, **kwargs):
+        """assert the mock has been called with the specified arguments.
+    
+        The assert passes if the mock has *ever* been called, unlike
+        `assert_called_with` and `assert_called_once_with` that only pass if
+        the call is the most recent one."""
+        expected = self._call_matcher((args, kwargs))
+        actual = [self._call_matcher(c) for c in self.call_args_list]
+        if expected not in actual:
+            cause = expected if isinstance(expected, Exception) else None
+            expected_string = self._format_mock_call_signature(args, kwargs)
+>           raise AssertionError(
+                '%s call not found' % expected_string
+            ) from cause
+E           AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+
+/root/miniconda3/envs/py_38/lib/python3.8/unittest/mock.py:984: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x7ffffae95f70>
+clone_dir = PosixPath('/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir')
+repo_type = 'hg', repo_url = 'https://bitbucket.org/foo/bar', repo_name = 'bar'
+
+    @pytest.mark.parametrize(
+        'repo_type, repo_url, repo_name',
+        [
+            ('git', 'https://github.com/hello/world.git', 'world'),
+            ('hg', 'https://bitbucket.org/foo/bar', 'bar'),
+            ('git', 'git@host:gitoliterepo', 'gitoliterepo'),
+            ('git', 'git@gitlab.com:cookiecutter/cookiecutter.git', 'cookiecutter'),
+            ('git', 'git@github.com:cookiecutter/cookiecutter.git', 'cookiecutter'),
+        ],
+    )
+    def test_clone_should_invoke_vcs_command(
+        mocker, clone_dir, repo_type, repo_url, repo_name
+    ):
+        """When `clone()` is called with a git/hg repo, the corresponding VCS \
+        command should be run via `subprocess.check_output()`.
+    
+        This should take place:
+        * In the correct dir
+        * With the correct args.
+        """
+        mocker.patch('cookiecutter.vcs.is_vcs_installed', autospec=True, return_value=True)
+    
+        mock_subprocess = mocker.patch(
+            'cookiecutter.vcs.subprocess.check_output',
+            autospec=True,
+        )
+        expected_repo_dir = os.path.normpath(os.path.join(clone_dir, repo_name))
+    
+        branch = 'foobar'
+    
+        repo_dir = vcs.clone(
+            repo_url, checkout=branch, clone_to_dir=str(clone_dir), no_input=True
+        )
+    
+        assert repo_dir == expected_repo_dir
+    
+        mock_subprocess.assert_any_call(
+            [repo_type, 'clone', repo_url], cwd=str(clone_dir), stderr=subprocess.STDOUT
+        )
+    
+        branch_info = [branch]
+        # We sanitize branch information for Mercurial
+        if repo_type == "hg":
+            branch_info.insert(0, "--")
+    
+>       mock_subprocess.assert_any_call(
+            [repo_type, 'checkout', *branch_info],
+            cwd=expected_repo_dir,
+            stderr=subprocess.STDOUT,
+        )
+
+tests/vcs/test_clone.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (['hg', 'checkout', '--', 'foobar'],)
+kwargs = {'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2}
+
+    def assert_any_call(*args, **kwargs):
+>       return mock.assert_any_call(*args, **kwargs)
+E       AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+E       
+E       pytest introspection follows:
+E       
+E       Args:
+E       assert (['hg', 'checkout', 'foobar'],) == (['hg', 'checkout', '--', 'foobar'],)
+E         
+E         At index 0 diff: ['hg', 'checkout', 'foobar'] != ['hg', 'checkout', '--', 'foobar']
+E         
+E         Full diff:
+E           (
+E               [
+E                   'hg',
+E                   'checkout',
+E         -         '--',
+E                   'foobar',
+E               ],
+E           )
+
+/root/miniconda3/envs/py_38/lib/python3.8/unittest/mock.py:213: AssertionError
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              58     19    67%   34-38, 45, 54, 69, 71, 82-83, 95, 112-125
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           867    746    14%
+
+=========================== short test summary info ============================
+FAILED tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] - AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+
+pytest introspection follows:
+
+Args:
+assert (['hg', 'checkout', 'foobar'],) == (['hg', 'checkout', '--', 'foobar'],)
+  
+  At index 0 diff: ['hg', 'checkout', 'foobar'] != ['hg', 'checkout', '--', 'foobar']
+  
+  Full diff:
+    (
+        [
+            'hg',
+            'checkout',
+  -         '--',
+            'foobar',
+        ],
+    )
+========================= 1 failed, 4 passed in 0.28s ==========================
+
+2026-01-16 21:55:13,609 - src.tools.run_test - INFO - fix-run.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 5 items
+
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-https://github.com/hello/world.git-world] PASSED [ 20%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] FAILED [ 40%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@host:gitoliterepo-gitoliterepo] PASSED [ 60%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@gitlab.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [ 80%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@github.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [100%]
+
+=================================== FAILURES ===================================
+__ test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] __
+
+self = <MagicMock name='check_output' spec='function' id='140737402751536'>
+args = (['hg', 'checkout', '--', 'foobar'],)
+kwargs = {'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2}
+expected = ('', <BoundArguments (popenargs=(['hg', 'checkout', '--', 'foobar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2})>)
+actual = [('', <BoundArguments (popenargs=(['hg', 'clone', 'https://bitbucket.org/foo/bar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir', 'stderr': -2})>), ('', <BoundArguments (popenargs=(['hg', 'checkout', 'foobar'],), kwargs={'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2})>)]
+cause = None
+expected_string = "check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2)"
+
+    def assert_any_call(self, /, *args, **kwargs):
+        """assert the mock has been called with the specified arguments.
+    
+        The assert passes if the mock has *ever* been called, unlike
+        `assert_called_with` and `assert_called_once_with` that only pass if
+        the call is the most recent one."""
+        expected = self._call_matcher((args, kwargs))
+        actual = [self._call_matcher(c) for c in self.call_args_list]
+        if expected not in actual:
+            cause = expected if isinstance(expected, Exception) else None
+            expected_string = self._format_mock_call_signature(args, kwargs)
+>           raise AssertionError(
+                '%s call not found' % expected_string
+            ) from cause
+E           AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+
+/root/miniconda3/envs/py_38/lib/python3.8/unittest/mock.py:984: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x7ffffae95f70>
+clone_dir = PosixPath('/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir')
+repo_type = 'hg', repo_url = 'https://bitbucket.org/foo/bar', repo_name = 'bar'
+
+    @pytest.mark.parametrize(
+        'repo_type, repo_url, repo_name',
+        [
+            ('git', 'https://github.com/hello/world.git', 'world'),
+            ('hg', 'https://bitbucket.org/foo/bar', 'bar'),
+            ('git', 'git@host:gitoliterepo', 'gitoliterepo'),
+            ('git', 'git@gitlab.com:cookiecutter/cookiecutter.git', 'cookiecutter'),
+            ('git', 'git@github.com:cookiecutter/cookiecutter.git', 'cookiecutter'),
+        ],
+    )
+    def test_clone_should_invoke_vcs_command(
+        mocker, clone_dir, repo_type, repo_url, repo_name
+    ):
+        """When `clone()` is called with a git/hg repo, the corresponding VCS \
+        command should be run via `subprocess.check_output()`.
+    
+        This should take place:
+        * In the correct dir
+        * With the correct args.
+        """
+        mocker.patch('cookiecutter.vcs.is_vcs_installed', autospec=True, return_value=True)
+    
+        mock_subprocess = mocker.patch(
+            'cookiecutter.vcs.subprocess.check_output',
+            autospec=True,
+        )
+        expected_repo_dir = os.path.normpath(os.path.join(clone_dir, repo_name))
+    
+        branch = 'foobar'
+    
+        repo_dir = vcs.clone(
+            repo_url, checkout=branch, clone_to_dir=str(clone_dir), no_input=True
+        )
+    
+        assert repo_dir == expected_repo_dir
+    
+        mock_subprocess.assert_any_call(
+            [repo_type, 'clone', repo_url], cwd=str(clone_dir), stderr=subprocess.STDOUT
+        )
+    
+        branch_info = [branch]
+        # We sanitize branch information for Mercurial
+        if repo_type == "hg":
+            branch_info.insert(0, "--")
+    
+>       mock_subprocess.assert_any_call(
+            [repo_type, 'checkout', *branch_info],
+            cwd=expected_repo_dir,
+            stderr=subprocess.STDOUT,
+        )
+
+tests/vcs/test_clone.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (['hg', 'checkout', '--', 'foobar'],)
+kwargs = {'cwd': '/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', 'stderr': -2}
+
+    def assert_any_call(*args, **kwargs):
+>       return mock.assert_any_call(*args, **kwargs)
+E       AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+E       
+E       pytest introspection follows:
+E       
+E       Args:
+E       assert (['hg', 'checkout', 'foobar'],) == (['hg', 'checkout', '--', 'foobar'],)
+E         
+E         At index 0 diff: ['hg', 'checkout', 'foobar'] != ['hg', 'checkout', '--', 'foobar']
+E         
+E         Full diff:
+E           (
+E               [
+E                   'hg',
+E                   'checkout',
+E         -         '--',
+E                   'foobar',
+E               ],
+E           )
+
+/root/miniconda3/envs/py_38/lib/python3.8/unittest/mock.py:213: AssertionError
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              58     19    67%   34-38, 45, 54, 69, 71, 82-83, 95, 112-125
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           867    746    14%
+
+=========================== short test summary info ============================
+FAILED tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] - AssertionError: check_output(['hg', 'checkout', '--', 'foobar'], cwd='/tmp/pytest-of-root/pytest-2/test_clone_should_invoke_vcs_c1/clone_dir/bar', stderr=-2) call not found
+
+pytest introspection follows:
+
+Args:
+assert (['hg', 'checkout', 'foobar'],) == (['hg', 'checkout', '--', 'foobar'],)
+  
+  At index 0 diff: ['hg', 'checkout', 'foobar'] != ['hg', 'checkout', '--', 'foobar']
+  
+  Full diff:
+    (
+        [
+            'hg',
+            'checkout',
+  -         '--',
+            'foobar',
+        ],
+    )
+========================= 1 failed, 4 passed in 0.28s ==========================
+
+2026-01-16 21:55:13,701 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:13,701 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:14,258 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 21:55:14,258 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 21:55:15,083 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 21:55:15,083 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 21:55:15,084 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 14 items / 5 deselected / 9 selected
+
+tests/vcs/test_clone.py::test_clone_should_raise_if_vcs_not_installed PASSED [ 11%]
+tests/vcs/test_clone.py::test_clone_should_rstrip_trailing_slash_in_repo_url PASSED [ 22%]
+tests/vcs/test_clone.py::test_clone_should_abort_if_user_does_not_want_to_reclone PASSED [ 33%]
+tests/vcs/test_clone.py::test_clone_should_silent_exit_if_ok_to_reuse PASSED [ 44%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[fatal: repository 'https://github.com/hackebro/cookiedozer' not found] PASSED [ 55%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[hg: abort: HTTP Error 404: Not Found] PASSED [ 66%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[error: pathspec 'unknown_branch' did not match any file(s) known to git] PASSED [ 77%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[hg: abort: unknown revision 'unknown_branch'!] PASSED [ 88%]
+tests/vcs/test_clone.py::test_clone_unknown_subprocess_error PASSED      [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              58     11    81%   34-38, 42-45, 69, 71, 91, 107
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           867    738    15%
+
+
+======================= 9 passed, 5 deselected in 0.21s ========================
+
+2026-01-16 21:55:15,084 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 14 items / 5 deselected / 9 selected
+
+tests/vcs/test_clone.py::test_clone_should_raise_if_vcs_not_installed PASSED [ 11%]
+tests/vcs/test_clone.py::test_clone_should_rstrip_trailing_slash_in_repo_url PASSED [ 22%]
+tests/vcs/test_clone.py::test_clone_should_abort_if_user_does_not_want_to_reclone PASSED [ 33%]
+tests/vcs/test_clone.py::test_clone_should_silent_exit_if_ok_to_reuse PASSED [ 44%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[fatal: repository 'https://github.com/hackebro/cookiedozer' not found] PASSED [ 55%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[hg: abort: HTTP Error 404: Not Found] PASSED [ 66%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[error: pathspec 'unknown_branch' did not match any file(s) known to git] PASSED [ 77%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[hg: abort: unknown revision 'unknown_branch'!] PASSED [ 88%]
+tests/vcs/test_clone.py::test_clone_unknown_subprocess_error PASSED      [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              58     11    81%   34-38, 42-45, 69, 71, 91, 107
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           867    738    15%
+
+
+======================= 9 passed, 5 deselected in 0.21s ========================
+
+2026-01-16 21:55:15,084 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 21:55:15,084 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 21:55:21,987 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:21,987 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:21,987 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 100,
+  "end_line": 105
+}
+2026-01-16 21:55:21,987 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 100,
+  "end_line": 105
+}
+2026-01-16 21:55:22,177 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:22,177 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:23,457 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:23,457 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:23,457 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 101,
+  "end_line": 105
+}
+2026-01-16 21:55:23,457 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 101,
+  "end_line": 105
+}
+2026-01-16 21:55:23,615 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:23,615 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:24,469 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:24,469 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 21:55:24,469 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 100,
+  "end_line": 110
+}
+2026-01-16 21:55:24,469 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "start_line": 100,
+  "end_line": 110
+}
+2026-01-16 21:55:24,629 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:24,629 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:55:26,585 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 21:55:26,585 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 21:55:26,586 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "old_code": "            if checkout is not None:\n                subprocess.check_output(  # nosec\n                    [repo_type, 'checkout', checkout],\n                    cwd=repo_dir,\n                    stderr=subprocess.STDOUT,\n                )",
+  "new_code": "            if checkout is not None:\n                checkout_cmd = [repo_type, 'checkout']\n                if repo_type == 'hg':\n                    checkout_cmd.append('--')\n                checkout_cmd.append(checkout)\n                subprocess.check_output(  # nosec\n                    checkout_cmd,\n                    cwd=repo_dir,\n                    stderr=subprocess.STDOUT,\n                )",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 21:55:26,586 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "cookiecutter/vcs.py",
+  "old_code": "            if checkout is not None:\n                subprocess.check_output(  # nosec\n                    [repo_type, 'checkout', checkout],\n                    cwd=repo_dir,\n                    stderr=subprocess.STDOUT,\n                )",
+  "new_code": "            if checkout is not None:\n                checkout_cmd = [repo_type, 'checkout']\n                if repo_type == 'hg':\n                    checkout_cmd.append('--')\n                checkout_cmd.append(checkout)\n                subprocess.check_output(  # nosec\n                    checkout_cmd,\n                    cwd=repo_dir,\n                    stderr=subprocess.STDOUT,\n                )",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 21:55:26,741 - src.tools.edit_code - INFO - EditCodeTool: Writing 4528 chars to cookiecutter/vcs.py (match_type=exact)
+2026-01-16 21:55:26,741 - src.tools.edit_code - INFO - EditCodeTool: Writing 4528 chars to cookiecutter/vcs.py (match_type=exact)
+2026-01-16 21:55:26,887 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 21:55:26,887 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 21:55:27,798 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 21:55:27,798 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 21:55:27,798 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "cookiecutter/vcs.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 21:55:27,798 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "cookiecutter/vcs.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/vcs/test_clone.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/vcs/test_clone.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   include_paths: ['cookiecutter/vcs.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   include_paths: ['cookiecutter/vcs.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/vcs/test_clone.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/vcs/test_clone.py']
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'cookiecutter/vcs.py' ':(exclude)tests/vcs/test_clone.py'
+2026-01-16 21:55:28,184 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'cookiecutter/vcs.py' ':(exclude)tests/vcs/test_clone.py'
+2026-01-16 21:55:28,361 - src.tools.run_test - INFO -   Generated patch: 1523 bytes, 31 lines
+2026-01-16 21:55:28,361 - src.tools.run_test - INFO -   Generated patch: 1523 bytes, 31 lines
+2026-01-16 21:55:28,361 - src.tools.run_test - INFO -   Patch content:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..f8a778a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+@@ -98,8 +104,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+                 stderr=subprocess.STDOUT,
+             )
+             if checkout is not None:
++                checkout_cmd = [repo_type, 'checkout']
++                if repo_type == 'hg':
++                    checkout_cmd.append('--')
++                checkout_cmd.append(checkout)
+                 subprocess.check_output(  # nosec
+-                    [repo_type, 'checkout', checkout],
++                    checkout_cmd,
+                     cwd=repo_dir,
+                     stderr=subprocess.STDOUT,
+                 )
+
+2026-01-16 21:55:28,361 - src.tools.run_test - INFO -   Patch content:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..f8a778a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+@@ -98,8 +104,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+                 stderr=subprocess.STDOUT,
+             )
+             if checkout is not None:
++                checkout_cmd = [repo_type, 'checkout']
++                if repo_type == 'hg':
++                    checkout_cmd.append('--')
++                checkout_cmd.append(checkout)
+                 subprocess.check_output(  # nosec
+-                    [repo_type, 'checkout', checkout],
++                    checkout_cmd,
+                     cwd=repo_dir,
+                     stderr=subprocess.STDOUT,
+                 )
+
+2026-01-16 21:55:28,460 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:28,460 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:28,973 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 21:55:28,973 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 21:55:29,112 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..f8a778a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+@@ -98,8 +104,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+                 stderr=subprocess.STDOUT,
+             )
+             if checkout is not None:
++                checkout_cmd = [repo_type, 'checkout']
++                if repo_type == 'hg':
++                    checkout_cmd.append('--')
++                checkout_cmd.append(checkout)
+                 subprocess.check_output(  # nosec
+-                    [repo_type, 'checkout', checkout],
++                    checkout_cmd,
+                     cwd=repo_dir,
+                     stderr=subprocess.STDOUT,
+                 )
+
+
+2026-01-16 21:55:29,112 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/cookiecutter/vcs.py b/cookiecutter/vcs.py
+index 08cb2eb..f8a778a 100644
+--- a/cookiecutter/vcs.py
++++ b/cookiecutter/vcs.py
+@@ -64,6 +64,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+     :param no_input: Suppress all user prompts when calling via API.
+     :returns: str with path to the new directory of the repository.
+     """
++    # Input validation to prevent argument injection
++    if repo_url.strip().startswith('-'):
++        raise ValueError("Invalid repo_url: must not start with a dash ('-') to prevent argument injection.")
++    if checkout is not None and str(checkout).strip().startswith('-'):
++        raise ValueError("Invalid checkout value: must not start with a dash ('-') to prevent argument injection.")
++
+     # Ensure that clone_to_dir exists
+     clone_to_dir = os.path.expanduser(clone_to_dir)
+     make_sure_path_exists(clone_to_dir)
+@@ -98,8 +104,12 @@ def clone(repo_url, checkout=None, clone_to_dir='.', no_input=False):
+                 stderr=subprocess.STDOUT,
+             )
+             if checkout is not None:
++                checkout_cmd = [repo_type, 'checkout']
++                if repo_type == 'hg':
++                    checkout_cmd.append('--')
++                checkout_cmd.append(checkout)
+                 subprocess.check_output(  # nosec
+-                    [repo_type, 'checkout', checkout],
++                    checkout_cmd,
+                     cwd=repo_dir,
+                     stderr=subprocess.STDOUT,
+                 )
+
+
+2026-01-16 21:55:30,049 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 21:55:30,049 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 21:55:30,050 - src.tools.run_test - INFO - fix-run.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 5 items
+
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-https://github.com/hello/world.git-world] PASSED [ 20%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] PASSED [ 40%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@host:gitoliterepo-gitoliterepo] PASSED [ 60%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@gitlab.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [ 80%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@github.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              62     19    69%   34-38, 45, 54, 69, 71, 82-83, 95, 116-129
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           871    746    14%
+
+
+============================== 5 passed in 0.20s ===============================
+
+2026-01-16 21:55:30,050 - src.tools.run_test - INFO - fix-run.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 5 items
+
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-https://github.com/hello/world.git-world] PASSED [ 20%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[hg-https://bitbucket.org/foo/bar-bar] PASSED [ 40%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@host:gitoliterepo-gitoliterepo] PASSED [ 60%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@gitlab.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [ 80%]
+tests/vcs/test_clone.py::test_clone_should_invoke_vcs_command[git-git@github.com:cookiecutter/cookiecutter.git-cookiecutter] PASSED [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              62     19    69%   34-38, 45, 54, 69, 71, 82-83, 95, 116-129
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           871    746    14%
+
+
+============================== 5 passed in 0.20s ===============================
+
+2026-01-16 21:55:30,216 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:30,216 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:55:30,852 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 21:55:30,852 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 21:55:32,013 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 21:55:32,013 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 21:55:32,014 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 14 items / 5 deselected / 9 selected
+
+tests/vcs/test_clone.py::test_clone_should_raise_if_vcs_not_installed PASSED [ 11%]
+tests/vcs/test_clone.py::test_clone_should_rstrip_trailing_slash_in_repo_url PASSED [ 22%]
+tests/vcs/test_clone.py::test_clone_should_abort_if_user_does_not_want_to_reclone PASSED [ 33%]
+tests/vcs/test_clone.py::test_clone_should_silent_exit_if_ok_to_reuse PASSED [ 44%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[fatal: repository 'https://github.com/hackebro/cookiedozer' not found] PASSED [ 55%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[hg: abort: HTTP Error 404: Not Found] PASSED [ 66%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[error: pathspec 'unknown_branch' did not match any file(s) known to git] PASSED [ 77%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[hg: abort: unknown revision 'unknown_branch'!] PASSED [ 88%]
+tests/vcs/test_clone.py::test_clone_unknown_subprocess_error PASSED      [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              62     15    76%   34-38, 42-45, 69, 71, 91, 107-111
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           871    742    15%
+
+
+======================= 9 passed, 5 deselected in 0.22s ========================
+
+2026-01-16 21:55:32,014 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2022-24065/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/cookiecutter
+configfile: setup.cfg
+plugins: mock-3.14.0, cov-5.0.0
+collecting ... collected 14 items / 5 deselected / 9 selected
+
+tests/vcs/test_clone.py::test_clone_should_raise_if_vcs_not_installed PASSED [ 11%]
+tests/vcs/test_clone.py::test_clone_should_rstrip_trailing_slash_in_repo_url PASSED [ 22%]
+tests/vcs/test_clone.py::test_clone_should_abort_if_user_does_not_want_to_reclone PASSED [ 33%]
+tests/vcs/test_clone.py::test_clone_should_silent_exit_if_ok_to_reuse PASSED [ 44%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[fatal: repository 'https://github.com/hackebro/cookiedozer' not found] PASSED [ 55%]
+tests/vcs/test_clone.py::test_clone_handles_repo_typo[hg: abort: HTTP Error 404: Not Found] PASSED [ 66%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[error: pathspec 'unknown_branch' did not match any file(s) known to git] PASSED [ 77%]
+tests/vcs/test_clone.py::test_clone_handles_branch_typo[hg: abort: unknown revision 'unknown_branch'!] PASSED [ 88%]
+tests/vcs/test_clone.py::test_clone_unknown_subprocess_error PASSED      [100%]
+
+---------- coverage: platform linux, python 3.8.20-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+cookiecutter/__init__.py          1      0   100%
+cookiecutter/__main__.py          1      1     0%   2
+cookiecutter/cli.py              74     74     0%   2-231
+cookiecutter/config.py           53     39    26%   31-33, 42-52, 57-77, 97-122
+cookiecutter/environment.py      20     13    35%   23-37, 45-50, 65
+cookiecutter/exceptions.py       23      4    83%   120-122, 126
+cookiecutter/extensions.py       33     33     0%   2-66
+cookiecutter/find.py             17     17     0%   2-31
+cookiecutter/generate.py        181    181     0%   2-391
+cookiecutter/hooks.py            64     64     0%   2-131
+cookiecutter/log.py              21     21     0%   2-51
+cookiecutter/main.py             48     48     0%   7-140
+cookiecutter/prompt.py           94     77    18%   20, 33, 42, 55-77, 88-102, 113-126, 146-163, 171-175, 184-236
+cookiecutter/replay.py           28     28     0%   6-52
+cookiecutter/repository.py       39     39     0%   2-127
+cookiecutter/utils.py            56     32    43%   22-23, 31, 42, 45, 55-61, 69-70, 85-108, 114-120
+cookiecutter/vcs.py              62     15    76%   34-38, 42-45, 69, 71, 91, 107-111
+cookiecutter/zipfile.py          56     56     0%   2-112
+-----------------------------------------------------------
+TOTAL                           871    742    15%
+
+
+======================= 9 passed, 5 deselected in 0.22s ========================
+
+2026-01-16 21:55:32,016 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 21:55:32,016 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 21:55:34,183 - src.agents.base - INFO - SingleAgent - LLM response (548 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The clone function allowed argument injection via repo_url or checkout, leading to possible command injection (CWE-77, CWE-78, CWE-94).",
+  "fix": "Added input validation to block repo_url and checkout values starting with '-', and ensured 'hg checkout' uses '--' before branch names to prevent option injection and match CLI/test expectations.",
+  "iterations": 2,
+  "files_modified": ["cookiecutter/vcs.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+
+2026-01-16 21:55:34,183 - src.agents.base - INFO - SingleAgent - LLM response (548 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The clone function allowed argument injection via repo_url or checkout, leading to possible command injection (CWE-77, CWE-78, CWE-94).",
+  "fix": "Added input validation to block repo_url and checkout values starting with '-', and ensured 'hg checkout' uses '--' before branch names to prevent option injection and match CLI/test expectations.",
+  "iterations": 2,
+  "files_modified": ["cookiecutter/vcs.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+
+2026-01-16 21:55:34,184 - orchestrator - INFO - Completed: Sample: CVE-2022-24065 | Status: success | Rounds: 2 | Duration: 48.8s
+2026-01-16 21:55:34,184 - orchestrator - INFO - Completed: Sample: CVE-2022-24065 | Status: success | Rounds: 2 | Duration: 48.8s
+2026-01-16 21:55:34,350 - __main__ - INFO - Extracted patch via /workspace/fix.patch (1524 bytes)

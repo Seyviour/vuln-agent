@@ -1,0 +1,599 @@
+2026-01-17 00:29:49,639 - orchestrator - INFO - Starting single-agent patching run for CVE-2020-25459
+2026-01-17 00:29:49,639 - orchestrator - INFO - Starting single-agent patching run for CVE-2020-25459
+2026-01-17 00:29:49,640 - orchestrator - INFO - Using container: single_agent_cve-2020-25459_7dfe82fc, work_dir: /workspace/FATE
+2026-01-17 00:29:49,640 - orchestrator - INFO - Using container: single_agent_cve-2020-25459_7dfe82fc, work_dir: /workspace/FATE
+2026-01-17 00:29:49,641 - src.agents.base - INFO - SingleAgent - LLM call prompt (2063 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2020-25459
+**CWE:** ['CWE-668']
+**Affected File:** federatedml/tree/hetero/hetero_decision_tree_guest.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+    def sync_tree(self):
+        LOGGER.info("sync tree to host")
+
+        self.transfer_inst.tree.remote(self.tree_,
+                                       role=consts.HOST,
+                                       idx=-1)
+        """
+        federation.remote(obj=self.tree_,
+                          name=self.transfer_inst.tree.name,
+                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                          role=consts.HOST,
+                          idx=-1)
+        """
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-17 00:29:49,641 - src.agents.base - INFO - SingleAgent - LLM call prompt (2063 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2020-25459
+**CWE:** ['CWE-668']
+**Affected File:** federatedml/tree/hetero/hetero_decision_tree_guest.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+    def sync_tree(self):
+        LOGGER.info("sync tree to host")
+
+        self.transfer_inst.tree.remote(self.tree_,
+                                       role=consts.HOST,
+                                       idx=-1)
+        """
+        federation.remote(obj=self.tree_,
+                          name=self.transfer_inst.tree.name,
+                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                          role=consts.HOST,
+                          idx=-1)
+        """
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-17 00:30:01,778 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-17 00:30:01,778 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-17 00:30:01,779 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "federatedml/tree/hetero/hetero_decision_tree_guest.py",
+  "old_code": "    def sync_tree(self):\n        LOGGER.info(\"sync tree to host\")\n\n        self.transfer_inst.tree.remote(self.tree_,\n                                       role=consts.HOST,\n                                       idx=-1)\n        \"\"\"\n        federation.remote(obj=self.tree_,\n                          name=self.transfer_inst.tree.name,\n                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),\n                          role=consts.HOST,\n                          idx=-1)\n        \"\"\"\n",
+  "new_code": "    def get_masked_tree(self):\n        \"\"\"\n        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).\n        Do NOT include feature indices, split values, weights, or any sensitive data.\n        \"\"\"\n        masked_tree = []\n        for node in self.tree_:\n            masked_node = Node(\n                id=node.id,\n                sitename=node.sitename,\n                is_leaf=node.is_leaf,\n                left_nodeid=node.left_nodeid,\n                right_nodeid=node.right_nodeid,\n                weight=None,  # Explicitly remove sensitive info\n                fid=None,\n                bid=None,\n                missing_dir=None\n            )\n            masked_tree.append(masked_node)\n        return masked_tree\n\n    def sync_tree(self):\n        LOGGER.info(\"sync tree to host (masked version)\")\n        masked_tree = self.get_masked_tree()\n        self.transfer_inst.tree.remote(masked_tree,\n                                       role=consts.HOST,\n                                       idx=-1)\n        \"\"\"\n        federation.remote(obj=masked_tree,\n                          name=self.transfer_inst.tree.name,\n                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),\n                          role=consts.HOST,\n                          idx=-1)\n        \"\"\"\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-17 00:30:01,779 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "federatedml/tree/hetero/hetero_decision_tree_guest.py",
+  "old_code": "    def sync_tree(self):\n        LOGGER.info(\"sync tree to host\")\n\n        self.transfer_inst.tree.remote(self.tree_,\n                                       role=consts.HOST,\n                                       idx=-1)\n        \"\"\"\n        federation.remote(obj=self.tree_,\n                          name=self.transfer_inst.tree.name,\n                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),\n                          role=consts.HOST,\n                          idx=-1)\n        \"\"\"\n",
+  "new_code": "    def get_masked_tree(self):\n        \"\"\"\n        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).\n        Do NOT include feature indices, split values, weights, or any sensitive data.\n        \"\"\"\n        masked_tree = []\n        for node in self.tree_:\n            masked_node = Node(\n                id=node.id,\n                sitename=node.sitename,\n                is_leaf=node.is_leaf,\n                left_nodeid=node.left_nodeid,\n                right_nodeid=node.right_nodeid,\n                weight=None,  # Explicitly remove sensitive info\n                fid=None,\n                bid=None,\n                missing_dir=None\n            )\n            masked_tree.append(masked_node)\n        return masked_tree\n\n    def sync_tree(self):\n        LOGGER.info(\"sync tree to host (masked version)\")\n        masked_tree = self.get_masked_tree()\n        self.transfer_inst.tree.remote(masked_tree,\n                                       role=consts.HOST,\n                                       idx=-1)\n        \"\"\"\n        federation.remote(obj=masked_tree,\n                          name=self.transfer_inst.tree.name,\n                          tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),\n                          role=consts.HOST,\n                          idx=-1)\n        \"\"\"\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-17 00:30:01,928 - src.tools.edit_code - INFO - EditCodeTool: Writing 40986 chars to federatedml/tree/hetero/hetero_decision_tree_guest.py (match_type=exact)
+2026-01-17 00:30:01,928 - src.tools.edit_code - INFO - EditCodeTool: Writing 40986 chars to federatedml/tree/hetero/hetero_decision_tree_guest.py (match_type=exact)
+2026-01-17 00:30:02,051 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-17 00:30:02,051 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-17 00:30:03,862 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-17 00:30:03,862 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-17 00:30:03,863 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "federatedml/tree/hetero/hetero_decision_tree_guest.py"
+  ],
+  "run_unittest": true
+}
+2026-01-17 00:30:03,863 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "federatedml/tree/hetero/hetero_decision_tree_guest.py"
+  ],
+  "run_unittest": true
+}
+2026-01-17 00:30:04,187 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-17 00:30:04,187 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   include_paths: ['federatedml/tree/hetero/hetero_decision_tree_guest.py']
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   include_paths: ['federatedml/tree/hetero/hetero_decision_tree_guest.py']
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'federatedml/tree/hetero/hetero_decision_tree_guest.py' ':(exclude)hand_test.py'
+2026-01-17 00:30:04,188 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'federatedml/tree/hetero/hetero_decision_tree_guest.py' ':(exclude)hand_test.py'
+2026-01-17 00:30:04,320 - src.tools.run_test - INFO -   Generated patch: 2085 bytes, 44 lines
+2026-01-17 00:30:04,320 - src.tools.run_test - INFO -   Generated patch: 2085 bytes, 44 lines
+2026-01-17 00:30:04,320 - src.tools.run_test - INFO -   Patch content:
+diff --git a/federatedml/tree/hetero/hetero_decision_tree_guest.py b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+index 1f23ddc..33d259c 100644
+--- a/federatedml/tree/hetero/hetero_decision_tree_guest.py
++++ b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+@@ -529,14 +529,35 @@ class HeteroDecisionTreeGuest(DecisionTree):
+                                                                      unleaf_state_nodeid1) == 2 else unleaf_state_nodeid2)
+         self.node_dispatch = self.node_dispatch.union(dispatch_guest_result)
+ 
+-    def sync_tree(self):
+-        LOGGER.info("sync tree to host")
++    def get_masked_tree(self):
++        """
++        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).
++        Do NOT include feature indices, split values, weights, or any sensitive data.
++        """
++        masked_tree = []
++        for node in self.tree_:
++            masked_node = Node(
++                id=node.id,
++                sitename=node.sitename,
++                is_leaf=node.is_leaf,
++                left_nodeid=node.left_nodeid,
++                right_nodeid=node.right_nodeid,
++                weight=None,  # Explicitly remove sensitive info
++                fid=None,
++                bid=None,
++                missing_dir=None
++            )
++            masked_tree.append(masked_node)
++        return masked_tree
+ 
+-        self.transfer_inst.tree.remote(self.tree_,
++    def sync_tree(self):
++        LOGGER.info("sync tree to host (masked version)")
++        masked_tree = self.get_masked_tree()
++        self.transfer_inst.tree.remote(masked_tree,
+                                        role=consts.HOST,
+                                        idx=-1)
+         """
+-        federation.remote(obj=self.tree_,
++        federation.remote(obj=masked_tree,
+                           name=self.transfer_inst.tree.name,
+                           tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                           role=consts.HOST,
+
+2026-01-17 00:30:04,320 - src.tools.run_test - INFO -   Patch content:
+diff --git a/federatedml/tree/hetero/hetero_decision_tree_guest.py b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+index 1f23ddc..33d259c 100644
+--- a/federatedml/tree/hetero/hetero_decision_tree_guest.py
++++ b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+@@ -529,14 +529,35 @@ class HeteroDecisionTreeGuest(DecisionTree):
+                                                                      unleaf_state_nodeid1) == 2 else unleaf_state_nodeid2)
+         self.node_dispatch = self.node_dispatch.union(dispatch_guest_result)
+ 
+-    def sync_tree(self):
+-        LOGGER.info("sync tree to host")
++    def get_masked_tree(self):
++        """
++        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).
++        Do NOT include feature indices, split values, weights, or any sensitive data.
++        """
++        masked_tree = []
++        for node in self.tree_:
++            masked_node = Node(
++                id=node.id,
++                sitename=node.sitename,
++                is_leaf=node.is_leaf,
++                left_nodeid=node.left_nodeid,
++                right_nodeid=node.right_nodeid,
++                weight=None,  # Explicitly remove sensitive info
++                fid=None,
++                bid=None,
++                missing_dir=None
++            )
++            masked_tree.append(masked_node)
++        return masked_tree
+ 
+-        self.transfer_inst.tree.remote(self.tree_,
++    def sync_tree(self):
++        LOGGER.info("sync tree to host (masked version)")
++        masked_tree = self.get_masked_tree()
++        self.transfer_inst.tree.remote(masked_tree,
+                                        role=consts.HOST,
+                                        idx=-1)
+         """
+-        federation.remote(obj=self.tree_,
++        federation.remote(obj=masked_tree,
+                           name=self.transfer_inst.tree.name,
+                           tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                           role=consts.HOST,
+
+2026-01-17 00:30:04,400 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-17 00:30:04,400 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-17 00:30:05,895 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-17 00:30:05,895 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-17 00:30:05,994 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/federatedml/tree/hetero/hetero_decision_tree_guest.py b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+index 1f23ddc..33d259c 100644
+--- a/federatedml/tree/hetero/hetero_decision_tree_guest.py
++++ b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+@@ -529,14 +529,35 @@ class HeteroDecisionTreeGuest(DecisionTree):
+                                                                      unleaf_state_nodeid1) == 2 else unleaf_state_nodeid2)
+         self.node_dispatch = self.node_dispatch.union(dispatch_guest_result)
+ 
+-    def sync_tree(self):
+-        LOGGER.info("sync tree to host")
++    def get_masked_tree(self):
++        """
++        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).
++        Do NOT include feature indices, split values, weights, or any sensitive data.
++        """
++        masked_tree = []
++        for node in self.tree_:
++            masked_node = Node(
++                id=node.id,
++                sitename=node.sitename,
++                is_leaf=node.is_leaf,
++                left_nodeid=node.left_nodeid,
++                right_nodeid=node.right_nodeid,
++                weight=None,  # Explicitly remove sensitive info
++                fid=None,
++                bid=None,
++                missing_dir=None
++            )
++            masked_tree.append(masked_node)
++        return masked_tree
+ 
+-        self.transfer_inst.tree.remote(self.tree_,
++    def sync_tree(self):
++        LOGGER.info("sync tree to host (masked version)")
++        masked_tree = self.get_masked_tree()
++        self.transfer_inst.tree.remote(masked_tree,
+                                        role=consts.HOST,
+                                        idx=-1)
+         """
+-        federation.remote(obj=self.tree_,
++        federation.remote(obj=masked_tree,
+                           name=self.transfer_inst.tree.name,
+                           tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                           role=consts.HOST,
+
+
+2026-01-17 00:30:05,994 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/federatedml/tree/hetero/hetero_decision_tree_guest.py b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+index 1f23ddc..33d259c 100644
+--- a/federatedml/tree/hetero/hetero_decision_tree_guest.py
++++ b/federatedml/tree/hetero/hetero_decision_tree_guest.py
+@@ -529,14 +529,35 @@ class HeteroDecisionTreeGuest(DecisionTree):
+                                                                      unleaf_state_nodeid1) == 2 else unleaf_state_nodeid2)
+         self.node_dispatch = self.node_dispatch.union(dispatch_guest_result)
+ 
+-    def sync_tree(self):
+-        LOGGER.info("sync tree to host")
++    def get_masked_tree(self):
++        """
++        Create a masked version of the tree, only including non-sensitive information (e.g., node id, is_leaf, left/right nodeid, sitename).
++        Do NOT include feature indices, split values, weights, or any sensitive data.
++        """
++        masked_tree = []
++        for node in self.tree_:
++            masked_node = Node(
++                id=node.id,
++                sitename=node.sitename,
++                is_leaf=node.is_leaf,
++                left_nodeid=node.left_nodeid,
++                right_nodeid=node.right_nodeid,
++                weight=None,  # Explicitly remove sensitive info
++                fid=None,
++                bid=None,
++                missing_dir=None
++            )
++            masked_tree.append(masked_node)
++        return masked_tree
+ 
+-        self.transfer_inst.tree.remote(self.tree_,
++    def sync_tree(self):
++        LOGGER.info("sync tree to host (masked version)")
++        masked_tree = self.get_masked_tree()
++        self.transfer_inst.tree.remote(masked_tree,
+                                        role=consts.HOST,
+                                        idx=-1)
+         """
+-        federation.remote(obj=self.tree_,
++        federation.remote(obj=masked_tree,
+                           name=self.transfer_inst.tree.name,
+                           tag=self.transfer_inst.generate_transferid(self.transfer_inst.tree),
+                           role=consts.HOST,
+
+
+2026-01-17 00:30:11,377 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-17 00:30:11,377 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-17 00:30:11,378 - src.tools.run_test - INFO - fix-run.sh output:
+create variable with name=ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureSumAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=LossScatterTransVar.loss, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=HasConvergedTransVar.has_converged, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureMeanAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+hetero decision tree guest init!
+splitter init!
+create variable with name=HeteroDecisionTreeTransferVariable.dispatch_node_host, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.dispatch_node_host_result, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.encrypted_grad_and_hess, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.encrypted_splitinfo_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.federated_best_splitinfo_host, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.final_splitinfo_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.node_positions, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_data, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_data_by_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_finish_tag, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.tree, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.tree_node_queue, src=('guest',), dst=('host',)
+sync tree to host (masked version)
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK
+
+2026-01-17 00:30:11,378 - src.tools.run_test - INFO - fix-run.sh output:
+create variable with name=ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureSumAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureSumAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+create variable with name=LossScatterTransVar.loss, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=HasConvergedTransVar.has_converged, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.AggregatorTransVar.ModelScatterTransVar.client_model, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureMeanAggregatorTransVar.AggregatorTransVar.ModelBroadcasterTransVar.server_model, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.UUIDTransVar.uuid, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r, src=('guest', 'host'), dst=('arbiter',)
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.p_power_r_bc, src=('arbiter',), dst=('guest', 'host')
+create variable with name=SecureMeanAggregatorTransVar.RandomPaddingCipherTransVar.DHTransVar.pubkey, src=('arbiter',), dst=('guest', 'host')
+hetero decision tree guest init!
+splitter init!
+create variable with name=HeteroDecisionTreeTransferVariable.dispatch_node_host, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.dispatch_node_host_result, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.encrypted_grad_and_hess, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.encrypted_splitinfo_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.federated_best_splitinfo_host, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.final_splitinfo_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.node_positions, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_data, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_data_by_host, src=('host',), dst=('guest',)
+create variable with name=HeteroDecisionTreeTransferVariable.predict_finish_tag, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.tree, src=('guest',), dst=('host',)
+create variable with name=HeteroDecisionTreeTransferVariable.tree_node_queue, src=('guest',), dst=('host',)
+sync tree to host (masked version)
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK
+
+2026-01-17 00:30:11,498 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-17 00:30:11,498 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-17 00:30:12,415 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-17 00:30:12,415 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-17 00:30:18,213 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-17 00:30:18,213 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-17 00:30:18,215 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.6.13, pytest-7.0.0, pluggy-1.0.0 -- /workspace/PoC_env/CVE-2020-25459/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/FATE
+collecting ... collected 9 items
+
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_init PASSED [ 11%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_node_gain PASSED [ 22%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_node_weight PASSED [ 33%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_split_gain PASSED [ 44%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_accumulate_histogram PASSED [ 55%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_aggregate_histogram PASSED [ 66%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_calculate_histogram PASSED [ 77%]
+federatedml/tree/test/node_test.py::TestNode::test_node PASSED           [ 88%]
+federatedml/tree/test/node_test.py::TestSplitInfo::test_splitinfo PASSED [100%]
+
+=============================== warnings summary ===============================
+../PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/lib/pretty.py:91
+  /workspace/PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/lib/pretty.py:91: DeprecationWarning: IPython.utils.signatures backport for Python 2 is deprecated in IPython 6, which only supports Python 3
+    from IPython.utils.signatures import signature
+
+../PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/utils/module_paths.py:28
+  /workspace/PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/utils/module_paths.py:28: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+    import imp
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 9 passed, 2 warnings in 4.91s =========================
+
+2026-01-17 00:30:18,215 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.6.13, pytest-7.0.0, pluggy-1.0.0 -- /workspace/PoC_env/CVE-2020-25459/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/FATE
+collecting ... collected 9 items
+
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_init PASSED [ 11%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_node_gain PASSED [ 22%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_node_weight PASSED [ 33%]
+federatedml/tree/test/criterion_test.py::TestXgboostCriterion::test_split_gain PASSED [ 44%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_accumulate_histogram PASSED [ 55%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_aggregate_histogram PASSED [ 66%]
+federatedml/tree/test/feature_histogram_test.py::TestFeatureHistogram::test_calculate_histogram PASSED [ 77%]
+federatedml/tree/test/node_test.py::TestNode::test_node PASSED           [ 88%]
+federatedml/tree/test/node_test.py::TestSplitInfo::test_splitinfo PASSED [100%]
+
+=============================== warnings summary ===============================
+../PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/lib/pretty.py:91
+  /workspace/PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/lib/pretty.py:91: DeprecationWarning: IPython.utils.signatures backport for Python 2 is deprecated in IPython 6, which only supports Python 3
+    from IPython.utils.signatures import signature
+
+../PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/utils/module_paths.py:28
+  /workspace/PoC_env/CVE-2020-25459/lib/python3.6/site-packages/IPython/utils/module_paths.py:28: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+    import imp
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 9 passed, 2 warnings in 4.91s =========================
+
+2026-01-17 00:30:18,215 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-17 00:30:18,215 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-17 00:30:20,731 - src.agents.base - INFO - SingleAgent - LLM response (880 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The guest was sending the full decision tree (including sensitive fields like split values, feature indices, and weights) to the host, exposing internal model details (CWE-668: Exposure of Resource to Wrong Sphere).",
+  "fix": "Implemented a masking function to strip sensitive fields (weight, fid, bid, missing_dir) from the tree nodes before sending to the host. Now only non-sensitive metadata (id, is_leaf, left/right nodeid, sitename) is sent.",
+  "iterations": 1,
+  "files_modified": ["federatedml/tree/hetero/hetero_decision_tree_guest.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+**Summary:**  
+- The vulnerability is fixed: sensitive information is no longer sent to the host.
+- The PoC test now passes, confirming the fix.
+- All unit tests pass, confirming no regressions.
+2026-01-17 00:30:20,731 - src.agents.base - INFO - SingleAgent - LLM response (880 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The guest was sending the full decision tree (including sensitive fields like split values, feature indices, and weights) to the host, exposing internal model details (CWE-668: Exposure of Resource to Wrong Sphere).",
+  "fix": "Implemented a masking function to strip sensitive fields (weight, fid, bid, missing_dir) from the tree nodes before sending to the host. Now only non-sensitive metadata (id, is_leaf, left/right nodeid, sitename) is sent.",
+  "iterations": 1,
+  "files_modified": ["federatedml/tree/hetero/hetero_decision_tree_guest.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+**Summary:**  
+- The vulnerability is fixed: sensitive information is no longer sent to the host.
+- The PoC test now passes, confirming the fix.
+- All unit tests pass, confirming no regressions.
+2026-01-17 00:30:20,732 - orchestrator - INFO - Completed: Sample: CVE-2020-25459 | Status: success | Rounds: 1 | Duration: 31.1s
+2026-01-17 00:30:20,732 - orchestrator - INFO - Completed: Sample: CVE-2020-25459 | Status: success | Rounds: 1 | Duration: 31.1s
+2026-01-17 00:30:20,881 - __main__ - INFO - Extracted patch via /workspace/fix.patch (2086 bytes)

@@ -1,0 +1,1165 @@
+2026-01-16 17:12:18,210 - orchestrator - INFO - Starting single-agent patching run for CVE-2024-3848
+2026-01-16 17:12:18,210 - orchestrator - INFO - Starting single-agent patching run for CVE-2024-3848
+2026-01-16 17:12:18,220 - orchestrator - INFO - Using container: single_agent_cve-2024-3848_25b82c65, work_dir: /workspace/mlflow
+2026-01-16 17:12:18,220 - orchestrator - INFO - Using container: single_agent_cve-2024-3848_25b82c65, work_dir: /workspace/mlflow
+2026-01-16 17:12:18,225 - src.agents.base - INFO - SingleAgent - LLM call prompt (2460 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2024-3848
+**CWE:** ['CWE-73', 'CWE-22']
+**Affected File:** mlflow/server/handlers.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def _create_experiment():
+    request_message = _get_request_message(
+        CreateExperiment(),
+        schema={
+            "name": [_assert_required, _assert_string],
+            "artifact_location": [_assert_string],
+            "tags": [_assert_array],
+        },
+    )
+
+    tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+
+    # Validate query string in artifact location to prevent attacks
+    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+    validate_query_string(parsed_artifact_locaion.query)
+
+    experiment_id = _get_tracking_store().create_experiment(
+        request_message.name, request_message.artifact_location, tags
+    )
+    response_message = CreateExperiment.Response()
+    response_message.experiment_id = experiment_id
+    response = Response(mimetype="application/json")
+    response.set_data(message_to_json(response_message))
+    return response
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 17:12:18,225 - src.agents.base - INFO - SingleAgent - LLM call prompt (2460 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2024-3848
+**CWE:** ['CWE-73', 'CWE-22']
+**Affected File:** mlflow/server/handlers.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def _create_experiment():
+    request_message = _get_request_message(
+        CreateExperiment(),
+        schema={
+            "name": [_assert_required, _assert_string],
+            "artifact_location": [_assert_string],
+            "tags": [_assert_array],
+        },
+    )
+
+    tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+
+    # Validate query string in artifact location to prevent attacks
+    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+    validate_query_string(parsed_artifact_locaion.query)
+
+    experiment_id = _get_tracking_store().create_experiment(
+        request_message.name, request_message.artifact_location, tags
+    )
+    response_message = CreateExperiment.Response()
+    response_message.experiment_id = experiment_id
+    response = Response(mimetype="application/json")
+    response.set_data(message_to_json(response_message))
+    return response
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 17:12:20,182 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:20,182 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:20,183 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 1,
+  "end_line": 1000
+}
+2026-01-16 17:12:20,183 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 1,
+  "end_line": 1000
+}
+2026-01-16 17:12:21,118 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:21,118 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:22,735 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:22,735 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:22,736 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_query_string",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:22,736 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_query_string",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:23,964 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:23,964 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:25,460 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:25,460 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:25,460 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 470,
+  "end_line": 490
+}
+2026-01-16 17:12:25,460 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 470,
+  "end_line": 490
+}
+2026-01-16 17:12:25,610 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:25,610 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:26,484 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:26,484 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:26,484 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_path_is_safe",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:26,484 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_path_is_safe",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:27,058 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:27,058 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:28,264 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:28,264 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:28,265 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 440,
+  "end_line": 470
+}
+2026-01-16 17:12:28,265 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 440,
+  "end_line": 470
+}
+2026-01-16 17:12:28,425 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:28,425 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:29,597 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:29,597 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:29,597 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "create_experiment",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:29,597 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "create_experiment",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 17:12:29,771 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:29,771 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:31,233 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:31,233 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:31,234 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 1,
+  "end_line": 100
+}
+2026-01-16 17:12:31,234 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 1,
+  "end_line": 100
+}
+2026-01-16 17:12:31,379 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:31,379 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:32,561 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:32,561 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:32,562 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 100,
+  "end_line": 200
+}
+2026-01-16 17:12:32,562 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 100,
+  "end_line": 200
+}
+2026-01-16 17:12:32,681 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:32,681 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:33,894 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:33,894 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:33,894 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "artifact_location",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:33,894 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "artifact_location",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:34,046 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:34,046 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:35,388 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:35,388 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:35,388 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "_create_experiment",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:35,388 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "_create_experiment",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:35,573 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:35,573 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:36,659 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:36,659 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 17:12:36,660 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "_get_tracking_store",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:36,660 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "_get_tracking_store",
+  "search_type": "usage",
+  "file_pattern": "mlflow/server/handlers.py"
+}
+2026-01-16 17:12:36,824 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:36,824 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 17:12:48,546 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:48,546 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:12:48,547 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 587,
+  "end_line": 613
+}
+2026-01-16 17:12:48,547 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 587,
+  "end_line": 613
+}
+2026-01-16 17:12:48,765 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:48,765 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:12:50,796 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 17:12:50,796 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 17:12:50,796 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "old_code": "    # Validate query string in artifact location to prevent attacks\n    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)\n    validate_query_string(parsed_artifact_locaion.query)\n",
+  "new_code": "    # Validate path and query string in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 17:12:50,796 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "old_code": "    # Validate query string in artifact location to prevent attacks\n    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)\n    validate_query_string(parsed_artifact_locaion.query)\n",
+  "new_code": "    # Validate path and query string in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 17:12:50,971 - src.tools.edit_code - INFO - EditCodeTool: Writing 85682 chars to mlflow/server/handlers.py (match_type=exact)
+2026-01-16 17:12:50,971 - src.tools.edit_code - INFO - EditCodeTool: Writing 85682 chars to mlflow/server/handlers.py (match_type=exact)
+2026-01-16 17:12:51,112 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 17:12:51,112 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 17:12:52,552 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 17:12:52,552 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 17:12:52,553 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "mlflow/server/handlers.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 17:12:52,553 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "mlflow/server/handlers.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/server/test_handlers.py']
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/server/test_handlers.py']
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO -   include_paths: ['mlflow/server/handlers.py']
+2026-01-16 17:12:52,876 - src.tools.run_test - INFO -   include_paths: ['mlflow/server/handlers.py']
+2026-01-16 17:12:52,877 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/server/test_handlers.py']
+2026-01-16 17:12:52,877 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/server/test_handlers.py']
+2026-01-16 17:12:52,877 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/server/handlers.py' ':(exclude)tests/server/test_handlers.py'
+2026-01-16 17:12:52,877 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/server/handlers.py' ':(exclude)tests/server/test_handlers.py'
+2026-01-16 17:12:53,023 - src.tools.run_test - INFO -   Generated patch: 926 bytes, 18 lines
+2026-01-16 17:12:53,023 - src.tools.run_test - INFO -   Generated patch: 926 bytes, 18 lines
+2026-01-16 17:12:53,023 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..90a9e5b 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,10 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path and query string in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+2026-01-16 17:12:53,023 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..90a9e5b 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,10 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path and query string in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+2026-01-16 17:12:53,117 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:12:53,117 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:12:57,455 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 17:12:57,455 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 17:12:57,569 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..90a9e5b 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,10 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path and query string in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+
+2026-01-16 17:12:57,569 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..90a9e5b 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,10 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path and query string in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+
+2026-01-16 17:13:02,453 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 17:13:02,453 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 17:13:02,455 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 1 item
+
+tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability [31mFAILED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[31m [100%][0m
+
+=================================== FAILURES ===================================
+[31m[1m_______________ test_local_file_read_write_by_pass_vulnerability _______________[0m
+
+    [0m[94mdef[39;49;00m[90m [39;49;00m[92mtest_local_file_read_write_by_pass_vulnerability[39;49;00m():[90m[39;49;00m
+        request = mock.MagicMock()[90m[39;49;00m
+        request.method = [33m"[39;49;00m[33mPOST[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        request.content_type = [33m"[39;49;00m[33mapplication/json; charset=utf-8[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        request.get_json = mock.MagicMock()[90m[39;49;00m
+        request.get_json.return_value = {[90m[39;49;00m
+            [33m"[39;49;00m[33mname[39;49;00m[33m"[39;49;00m: [33m"[39;49;00m[33mhello[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33martifact_location[39;49;00m[33m"[39;49;00m: [33m"[39;49;00m[33mhttp://host#/abc/etc/[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        }[90m[39;49;00m
+        msg = _get_request_message(CreateExperiment(), flask_request=request)[90m[39;49;00m
+        [94mwith[39;49;00m mock.patch([33m"[39;49;00m[33mmlflow.server.handlers._get_request_message[39;49;00m[33m"[39;49;00m, return_value=msg):[90m[39;49;00m
+            response = _create_experiment()[90m[39;49;00m
+            json_response = json.loads(response.get_data())[90m[39;49;00m
+>           [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33m'[39;49;00m[33martifact_location[39;49;00m[33m'[39;49;00m[33m URL can[39;49;00m[33m'[39;49;00m[33mt include fragment part.[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE           assert 'Expected str, got bytes' == "'artifact_lo...ragment part."[0m
+[1m[31mE             [0m
+[1m[31mE             - 'artifact_location' URL can't include fragment part.[0m
+[1m[31mE             + Expected str, got bytes[0m
+
+json_response = {'error_code': 'INTERNAL_ERROR', 'message': 'Expected str, got bytes'}
+msg        = name: "hello"
+artifact_location: "http://host#/abc/etc/"
+
+request    = <MagicMock id='140736482992336'>
+response   = <Response 70 bytes [500 INTERNAL SERVER ERROR]>
+
+[1m[31mtests/server/test_handlers.py[0m:820: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026/01/16 22:13:01 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/01/16 22:13:01 INFO mlflow.store.db.utils: Updating database tables
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 451aebb31d03, add metric step
+INFO  [alembic.runtime.migration] Running upgrade 451aebb31d03 -> 90e64c465722, migrate user column to tags
+INFO  [alembic.runtime.migration] Running upgrade 90e64c465722 -> 181f10493468, allow nulls for metric values
+INFO  [alembic.runtime.migration] Running upgrade 181f10493468 -> df50e92ffc5e, Add Experiment Tags Table
+INFO  [alembic.runtime.migration] Running upgrade df50e92ffc5e -> 7ac759974ad8, Update run tags with larger limit
+INFO  [alembic.runtime.migration] Running upgrade 7ac759974ad8 -> 89d4b8295536, create latest metrics table
+INFO  [89d4b8295536_create_latest_metrics_table_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 89d4b8295536 -> 2b4d017a5e9b, add model registry tables to db
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Adding registered_models and model_versions tables to database.
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 2b4d017a5e9b -> cfd24bdc0731, Update run status constraint with killed
+INFO  [alembic.runtime.migration] Running upgrade cfd24bdc0731 -> 0a8213491aaa, drop_duplicate_killed_constraint
+INFO  [alembic.runtime.migration] Running upgrade 0a8213491aaa -> 728d730b5ebd, add registered model tags table
+INFO  [alembic.runtime.migration] Running upgrade 728d730b5ebd -> 27a6a02d2cf1, add model version tags table
+INFO  [alembic.runtime.migration] Running upgrade 27a6a02d2cf1 -> 84291f40a231, add run_link to model_version
+INFO  [alembic.runtime.migration] Running upgrade 84291f40a231 -> a8c4a736bde6, allow nulls for run_id
+INFO  [alembic.runtime.migration] Running upgrade a8c4a736bde6 -> 39d1c3be5f05, add_is_nan_constraint_for_metrics_tables_if_necessary
+INFO  [alembic.runtime.migration] Running upgrade 39d1c3be5f05 -> c48cb773bb87, reset_default_value_for_is_nan_in_metrics_table_for_mysql
+INFO  [alembic.runtime.migration] Running upgrade c48cb773bb87 -> bd07f7e963c5, create index on run_uuid
+INFO  [alembic.runtime.migration] Running upgrade bd07f7e963c5 -> 0c779009ac13, add deleted_time field to runs table
+INFO  [alembic.runtime.migration] Running upgrade 0c779009ac13 -> cc1f77228345, change param value length to 500
+INFO  [alembic.runtime.migration] Running upgrade cc1f77228345 -> 97727af70f4d, Add creation_time and last_update_time to experiments table
+INFO  [alembic.runtime.migration] Running upgrade 97727af70f4d -> 3500859a5d39, Add Model Aliases table
+INFO  [alembic.runtime.migration] Running upgrade 3500859a5d39 -> 7f2a7d5fae7d, add datasets inputs input_tags tables
+INFO  [alembic.runtime.migration] Running upgrade 7f2a7d5fae7d -> 2d6e25af4d3e, increase max param val length from 500 to 8000
+INFO  [alembic.runtime.migration] Running upgrade 2d6e25af4d3e -> acf3f17fdcc7, add storage location field to model versions
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+============================= slowest 10 durations =============================
+0.78s call     tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= command to run failed test cases =======================
+pytest 'tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability'
+
+[36m[1m=========================== short test summary info ============================[0m
+[31mFAILED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_local_file_read_write_by_pass_vulnerability[0m - assert 'Expected str, got bytes' == "'artifact_lo...ragment part."
+[31m========================= [31m[1m1 failed[0m, [33m1 warning[0m[31m in 1.13s[0m[31m =========================[0m
+
+2026-01-16 17:13:02,455 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 1 item
+
+tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability [31mFAILED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[31m [100%][0m
+
+=================================== FAILURES ===================================
+[31m[1m_______________ test_local_file_read_write_by_pass_vulnerability _______________[0m
+
+    [0m[94mdef[39;49;00m[90m [39;49;00m[92mtest_local_file_read_write_by_pass_vulnerability[39;49;00m():[90m[39;49;00m
+        request = mock.MagicMock()[90m[39;49;00m
+        request.method = [33m"[39;49;00m[33mPOST[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        request.content_type = [33m"[39;49;00m[33mapplication/json; charset=utf-8[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+        request.get_json = mock.MagicMock()[90m[39;49;00m
+        request.get_json.return_value = {[90m[39;49;00m
+            [33m"[39;49;00m[33mname[39;49;00m[33m"[39;49;00m: [33m"[39;49;00m[33mhello[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33martifact_location[39;49;00m[33m"[39;49;00m: [33m"[39;49;00m[33mhttp://host#/abc/etc/[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        }[90m[39;49;00m
+        msg = _get_request_message(CreateExperiment(), flask_request=request)[90m[39;49;00m
+        [94mwith[39;49;00m mock.patch([33m"[39;49;00m[33mmlflow.server.handlers._get_request_message[39;49;00m[33m"[39;49;00m, return_value=msg):[90m[39;49;00m
+            response = _create_experiment()[90m[39;49;00m
+            json_response = json.loads(response.get_data())[90m[39;49;00m
+>           [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33m'[39;49;00m[33martifact_location[39;49;00m[33m'[39;49;00m[33m URL can[39;49;00m[33m'[39;49;00m[33mt include fragment part.[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE           assert 'Expected str, got bytes' == "'artifact_lo...ragment part."[0m
+[1m[31mE             [0m
+[1m[31mE             - 'artifact_location' URL can't include fragment part.[0m
+[1m[31mE             + Expected str, got bytes[0m
+
+json_response = {'error_code': 'INTERNAL_ERROR', 'message': 'Expected str, got bytes'}
+msg        = name: "hello"
+artifact_location: "http://host#/abc/etc/"
+
+request    = <MagicMock id='140736482992336'>
+response   = <Response 70 bytes [500 INTERNAL SERVER ERROR]>
+
+[1m[31mtests/server/test_handlers.py[0m:820: AssertionError
+----------------------------- Captured stderr call -----------------------------
+2026/01/16 22:13:01 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/01/16 22:13:01 INFO mlflow.store.db.utils: Updating database tables
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 451aebb31d03, add metric step
+INFO  [alembic.runtime.migration] Running upgrade 451aebb31d03 -> 90e64c465722, migrate user column to tags
+INFO  [alembic.runtime.migration] Running upgrade 90e64c465722 -> 181f10493468, allow nulls for metric values
+INFO  [alembic.runtime.migration] Running upgrade 181f10493468 -> df50e92ffc5e, Add Experiment Tags Table
+INFO  [alembic.runtime.migration] Running upgrade df50e92ffc5e -> 7ac759974ad8, Update run tags with larger limit
+INFO  [alembic.runtime.migration] Running upgrade 7ac759974ad8 -> 89d4b8295536, create latest metrics table
+INFO  [89d4b8295536_create_latest_metrics_table_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 89d4b8295536 -> 2b4d017a5e9b, add model registry tables to db
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Adding registered_models and model_versions tables to database.
+INFO  [2b4d017a5e9b_add_model_registry_tables_to_db_py] Migration complete!
+INFO  [alembic.runtime.migration] Running upgrade 2b4d017a5e9b -> cfd24bdc0731, Update run status constraint with killed
+INFO  [alembic.runtime.migration] Running upgrade cfd24bdc0731 -> 0a8213491aaa, drop_duplicate_killed_constraint
+INFO  [alembic.runtime.migration] Running upgrade 0a8213491aaa -> 728d730b5ebd, add registered model tags table
+INFO  [alembic.runtime.migration] Running upgrade 728d730b5ebd -> 27a6a02d2cf1, add model version tags table
+INFO  [alembic.runtime.migration] Running upgrade 27a6a02d2cf1 -> 84291f40a231, add run_link to model_version
+INFO  [alembic.runtime.migration] Running upgrade 84291f40a231 -> a8c4a736bde6, allow nulls for run_id
+INFO  [alembic.runtime.migration] Running upgrade a8c4a736bde6 -> 39d1c3be5f05, add_is_nan_constraint_for_metrics_tables_if_necessary
+INFO  [alembic.runtime.migration] Running upgrade 39d1c3be5f05 -> c48cb773bb87, reset_default_value_for_is_nan_in_metrics_table_for_mysql
+INFO  [alembic.runtime.migration] Running upgrade c48cb773bb87 -> bd07f7e963c5, create index on run_uuid
+INFO  [alembic.runtime.migration] Running upgrade bd07f7e963c5 -> 0c779009ac13, add deleted_time field to runs table
+INFO  [alembic.runtime.migration] Running upgrade 0c779009ac13 -> cc1f77228345, change param value length to 500
+INFO  [alembic.runtime.migration] Running upgrade cc1f77228345 -> 97727af70f4d, Add creation_time and last_update_time to experiments table
+INFO  [alembic.runtime.migration] Running upgrade 97727af70f4d -> 3500859a5d39, Add Model Aliases table
+INFO  [alembic.runtime.migration] Running upgrade 3500859a5d39 -> 7f2a7d5fae7d, add datasets inputs input_tags tables
+INFO  [alembic.runtime.migration] Running upgrade 7f2a7d5fae7d -> 2d6e25af4d3e, increase max param val length from 500 to 8000
+INFO  [alembic.runtime.migration] Running upgrade 2d6e25af4d3e -> acf3f17fdcc7, add storage location field to model versions
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+============================= slowest 10 durations =============================
+0.78s call     tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= command to run failed test cases =======================
+pytest 'tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability'
+
+[36m[1m=========================== short test summary info ============================[0m
+[31mFAILED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_local_file_read_write_by_pass_vulnerability[0m - assert 'Expected str, got bytes' == "'artifact_lo...ragment part."
+[31m========================= [31m[1m1 failed[0m, [33m1 warning[0m[31m in 1.13s[0m[31m =========================[0m
+
+2026-01-16 17:13:02,577 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:02,577 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:03,232 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 17:13:03,232 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 17:13:05,442 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 17:13:05,442 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 17:13:05,442 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 42 items / 1 deselected / 41 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 17%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 19%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 21%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 24%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 26%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 29%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 31%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 34%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 36%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 39%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 41%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 43%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 46%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 48%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 51%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 53%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 56%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 58%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 60%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 63%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 65%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 68%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 70%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 73%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 75%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 78%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 80%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 82%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 85%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 87%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 90%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 92%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 95%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 97%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m================= [32m41 passed[0m, [33m[1m1 deselected[0m, [33m[1m1 warning[0m[33m in 0.32s[0m[33m ==================[0m
+
+2026-01-16 17:13:05,442 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 42 items / 1 deselected / 41 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 17%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 19%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 21%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 24%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 26%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 29%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 31%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 34%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 36%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 39%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 41%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 43%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 46%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 48%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 51%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 53%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 56%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 58%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 60%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 63%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 65%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 68%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 70%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 73%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 75%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 78%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 80%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 82%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 85%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 87%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 90%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 92%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 95%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 97%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m================= [32m41 passed[0m, [33m[1m1 deselected[0m, [33m[1m1 warning[0m[33m in 0.32s[0m[33m ==================[0m
+
+2026-01-16 17:13:05,443 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 17:13:05,443 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 17:13:17,688 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:13:17,688 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 17:13:17,691 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 587,
+  "end_line": 613
+}
+2026-01-16 17:13:17,691 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 587,
+  "end_line": 613
+}
+2026-01-16 17:13:17,952 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:13:17,952 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 17:13:20,999 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 17:13:20,999 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 17:13:20,999 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "old_code": "    # Validate path and query string in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "new_code": "    # Validate path, query string, and fragment in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    if parsed_artifact_location.fragment:\n        raise MlflowException(\"'artifact_location' URL can't include fragment part.\", error_code=INVALID_PARAMETER_VALUE)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 17:13:20,999 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "old_code": "    # Validate path and query string in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "new_code": "    # Validate path, query string, and fragment in artifact location to prevent attacks\n    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)\n    if parsed_artifact_location.fragment:\n        raise MlflowException(\"'artifact_location' URL can't include fragment part.\", error_code=INVALID_PARAMETER_VALUE)\n    validate_path_is_safe(parsed_artifact_location.path)\n    validate_query_string(parsed_artifact_location.query)\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 17:13:21,145 - src.tools.edit_code - INFO - EditCodeTool: Writing 85857 chars to mlflow/server/handlers.py (match_type=exact)
+2026-01-16 17:13:21,145 - src.tools.edit_code - INFO - EditCodeTool: Writing 85857 chars to mlflow/server/handlers.py (match_type=exact)
+2026-01-16 17:13:21,276 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 17:13:21,276 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 17:13:22,359 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 17:13:22,359 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 17:13:22,360 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "mlflow/server/handlers.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 17:13:22,360 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "mlflow/server/handlers.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/server/test_handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/server/test_handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   include_paths: ['mlflow/server/handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   include_paths: ['mlflow/server/handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/server/test_handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/server/test_handlers.py']
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/server/handlers.py' ':(exclude)tests/server/test_handlers.py'
+2026-01-16 17:13:22,685 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/server/handlers.py' ':(exclude)tests/server/test_handlers.py'
+2026-01-16 17:13:22,832 - src.tools.run_test - INFO -   Generated patch: 1103 bytes, 20 lines
+2026-01-16 17:13:22,832 - src.tools.run_test - INFO -   Generated patch: 1103 bytes, 20 lines
+2026-01-16 17:13:22,833 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..61b87de 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,12 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path, query string, and fragment in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    if parsed_artifact_location.fragment:
++        raise MlflowException("'artifact_location' URL can't include fragment part.", error_code=INVALID_PARAMETER_VALUE)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+2026-01-16 17:13:22,833 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..61b87de 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,12 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path, query string, and fragment in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    if parsed_artifact_location.fragment:
++        raise MlflowException("'artifact_location' URL can't include fragment part.", error_code=INVALID_PARAMETER_VALUE)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+2026-01-16 17:13:22,955 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:22,955 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:23,523 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 17:13:23,523 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 17:13:23,615 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..61b87de 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,12 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path, query string, and fragment in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    if parsed_artifact_location.fragment:
++        raise MlflowException("'artifact_location' URL can't include fragment part.", error_code=INVALID_PARAMETER_VALUE)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+
+2026-01-16 17:13:23,615 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/server/handlers.py b/mlflow/server/handlers.py
+index 6d32040..61b87de 100644
+--- a/mlflow/server/handlers.py
++++ b/mlflow/server/handlers.py
+@@ -598,9 +598,12 @@ def _create_experiment():
+ 
+     tags = [ExperimentTag(tag.key, tag.value) for tag in request_message.tags]
+ 
+-    # Validate query string in artifact location to prevent attacks
+-    parsed_artifact_locaion = urllib.parse.urlparse(request_message.artifact_location)
+-    validate_query_string(parsed_artifact_locaion.query)
++    # Validate path, query string, and fragment in artifact location to prevent attacks
++    parsed_artifact_location = urllib.parse.urlparse(request_message.artifact_location)
++    if parsed_artifact_location.fragment:
++        raise MlflowException("'artifact_location' URL can't include fragment part.", error_code=INVALID_PARAMETER_VALUE)
++    validate_path_is_safe(parsed_artifact_location.path)
++    validate_query_string(parsed_artifact_location.query)
+ 
+     experiment_id = _get_tracking_store().create_experiment(
+         request_message.name, request_message.artifact_location, tags
+
+
+2026-01-16 17:13:25,766 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 17:13:25,766 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 17:13:25,767 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 1 item
+
+tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m========================= [32m1 passed[0m, [33m[1m1 warning[0m[33m in 0.19s[0m[33m =========================[0m
+
+2026-01-16 17:13:25,767 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 1 item
+
+tests/server/test_handlers.py::test_local_file_read_write_by_pass_vulnerability [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m========================= [32m1 passed[0m, [33m[1m1 warning[0m[33m in 0.19s[0m[33m =========================[0m
+
+2026-01-16 17:13:25,874 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:25,874 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 17:13:26,486 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 17:13:26,486 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 17:13:28,518 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 17:13:28,518 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 17:13:28,518 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 42 items / 1 deselected / 41 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 17%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 19%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 21%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 24%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 26%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 29%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 31%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 34%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 36%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 39%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 41%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 43%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 46%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 48%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 51%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 53%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 56%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 58%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 60%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 63%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 65%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 68%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 70%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 73%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 75%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 78%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 80%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 82%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 85%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 87%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 90%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 92%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 95%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 97%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m================= [32m41 passed[0m, [33m[1m1 deselected[0m, [33m[1m1 warning[0m[33m in 0.28s[0m[33m ==================[0m
+
+2026-01-16 17:13:28,518 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.1.0, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2024-3848/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 42 items / 1 deselected / 41 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 17%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 19%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 21%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 24%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 26%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 29%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 31%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 34%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 36%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 39%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 41%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 43%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 46%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 48%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 51%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 53%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 56%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 58%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 60%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 63%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 65%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 68%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 70%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 73%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 75%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 78%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 80%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 82%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 85%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 87%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 90%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 92%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 95%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [ 97%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.6/3.8 GB | DISK 92.1/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m================= [32m41 passed[0m, [33m[1m1 deselected[0m, [33m[1m1 warning[0m[33m in 0.28s[0m[33m ==================[0m
+
+2026-01-16 17:13:28,519 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 17:13:28,519 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 17:13:33,390 - src.agents.base - INFO - SingleAgent - LLM response (836 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The path and fragment components of artifact_location in experiment creation were not properly validated, allowing potential path traversal and unsafe URL fragments (CWE-22, CWE-73).",
+  "fix": "Added validation to block artifact_location URLs with a fragment part and to validate the path component for traversal and unsafe patterns, raising a clear error if a fragment is present.",
+  "iterations": 2,
+  "files_modified": ["mlflow/server/handlers.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+**Summary:**  
+- The patch now blocks artifact_location URLs with a fragment and validates the path for traversal, as required by the vulnerability.  
+- All PoC and regression/unit tests pass, confirming the fix is both secure and non-breaking.
+2026-01-16 17:13:33,390 - src.agents.base - INFO - SingleAgent - LLM response (836 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The path and fragment components of artifact_location in experiment creation were not properly validated, allowing potential path traversal and unsafe URL fragments (CWE-22, CWE-73).",
+  "fix": "Added validation to block artifact_location URLs with a fragment part and to validate the path component for traversal and unsafe patterns, raising a clear error if a fragment is present.",
+  "iterations": 2,
+  "files_modified": ["mlflow/server/handlers.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+**Summary:**  
+- The patch now blocks artifact_location URLs with a fragment and validates the path for traversal, as required by the vulnerability.  
+- All PoC and regression/unit tests pass, confirming the fix is both secure and non-breaking.
+2026-01-16 17:13:33,392 - orchestrator - INFO - Completed: Sample: CVE-2024-3848 | Status: success | Rounds: 2 | Duration: 75.2s
+2026-01-16 17:13:33,392 - orchestrator - INFO - Completed: Sample: CVE-2024-3848 | Status: success | Rounds: 2 | Duration: 75.2s
+2026-01-16 17:13:33,540 - __main__ - INFO - Extracted patch via /workspace/fix.patch (1104 bytes)

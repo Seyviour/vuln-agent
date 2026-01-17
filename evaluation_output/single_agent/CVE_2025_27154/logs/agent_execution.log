@@ -1,0 +1,591 @@
+2026-01-16 14:26:50,340 - orchestrator - INFO - Starting single-agent patching run for CVE-2025-27154
+2026-01-16 14:26:50,340 - orchestrator - INFO - Starting single-agent patching run for CVE-2025-27154
+2026-01-16 14:26:50,340 - orchestrator - INFO - Using container: single_agent_cve-2025-27154_9f2cf860, work_dir: /workspace/spotipy
+2026-01-16 14:26:50,340 - orchestrator - INFO - Using container: single_agent_cve-2025-27154_9f2cf860, work_dir: /workspace/spotipy
+2026-01-16 14:26:50,341 - src.agents.base - INFO - SingleAgent - LLM call prompt (1817 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2025-27154
+**CWE:** ['CWE-276']
+**Affected File:** spotipy/cache_handler.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+    def save_token_to_cache(self, token_info):
+        try:
+            with open(self.cache_path, "w", encoding='utf-8') as f:
+                f.write(json.dumps(token_info, cls=self.encoder_cls))
+        except OSError:
+            logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 14:26:50,341 - src.agents.base - INFO - SingleAgent - LLM call prompt (1817 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2025-27154
+**CWE:** ['CWE-276']
+**Affected File:** spotipy/cache_handler.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+    def save_token_to_cache(self, token_info):
+        try:
+            with open(self.cache_path, "w", encoding='utf-8') as f:
+                f.write(json.dumps(token_info, cls=self.encoder_cls))
+        except OSError:
+            logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 14:27:07,529 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:27:07,529 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:27:07,530 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "spotipy/cache_handler.py",
+  "old_code": "    def save_token_to_cache(self, token_info):\n        try:\n            with open(self.cache_path, \"w\", encoding='utf-8') as f:\n                f.write(json.dumps(token_info, cls=self.encoder_cls))\n        except OSError:\n            logger.warning(f\"Couldn't write token to cache at: {self.cache_path}\")",
+  "new_code": "    def save_token_to_cache(self, token_info):\n        try:\n            with open(self.cache_path, \"w\", encoding='utf-8') as f:\n                f.write(json.dumps(token_info, cls=self.encoder_cls))\n            # Set file permissions to 0o600 (owner read/write only)\n            try:\n                os.chmod(self.cache_path, 0o600)\n            except Exception as e:\n                logger.warning(f\"Couldn't set permissions on cache file at: {self.cache_path}: {e}\")\n        except OSError:\n            logger.warning(f\"Couldn't write token to cache at: {self.cache_path}\")",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:27:07,530 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "spotipy/cache_handler.py",
+  "old_code": "    def save_token_to_cache(self, token_info):\n        try:\n            with open(self.cache_path, \"w\", encoding='utf-8') as f:\n                f.write(json.dumps(token_info, cls=self.encoder_cls))\n        except OSError:\n            logger.warning(f\"Couldn't write token to cache at: {self.cache_path}\")",
+  "new_code": "    def save_token_to_cache(self, token_info):\n        try:\n            with open(self.cache_path, \"w\", encoding='utf-8') as f:\n                f.write(json.dumps(token_info, cls=self.encoder_cls))\n            # Set file permissions to 0o600 (owner read/write only)\n            try:\n                os.chmod(self.cache_path, 0o600)\n            except Exception as e:\n                logger.warning(f\"Couldn't set permissions on cache file at: {self.cache_path}: {e}\")\n        except OSError:\n            logger.warning(f\"Couldn't write token to cache at: {self.cache_path}\")",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:27:07,681 - src.tools.edit_code - INFO - EditCodeTool: Writing 7729 chars to spotipy/cache_handler.py (match_type=exact)
+2026-01-16 14:27:07,681 - src.tools.edit_code - INFO - EditCodeTool: Writing 7729 chars to spotipy/cache_handler.py (match_type=exact)
+2026-01-16 14:27:07,820 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:27:07,820 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:27:10,303 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:27:10,303 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:27:10,304 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "spotipy/cache_handler.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:27:10,304 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "spotipy/cache_handler.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO -   include_paths: ['spotipy/cache_handler.py']
+2026-01-16 14:27:10,620 - src.tools.run_test - INFO -   include_paths: ['spotipy/cache_handler.py']
+2026-01-16 14:27:10,621 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:27:10,621 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:27:10,621 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'spotipy/cache_handler.py' ':(exclude)hand_test.py'
+2026-01-16 14:27:10,621 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'spotipy/cache_handler.py' ':(exclude)hand_test.py'
+2026-01-16 14:27:10,755 - src.tools.run_test - INFO -   Generated patch: 754 bytes, 16 lines
+2026-01-16 14:27:10,755 - src.tools.run_test - INFO -   Generated patch: 754 bytes, 16 lines
+2026-01-16 14:27:10,755 - src.tools.run_test - INFO -   Patch content:
+diff --git a/spotipy/cache_handler.py b/spotipy/cache_handler.py
+index 936e81b..59f34a5 100644
+--- a/spotipy/cache_handler.py
++++ b/spotipy/cache_handler.py
+@@ -94,6 +94,11 @@ class CacheFileHandler(CacheHandler):
+         try:
+             with open(self.cache_path, "w", encoding='utf-8') as f:
+                 f.write(json.dumps(token_info, cls=self.encoder_cls))
++            # Set file permissions to 0o600 (owner read/write only)
++            try:
++                os.chmod(self.cache_path, 0o600)
++            except Exception as e:
++                logger.warning(f"Couldn't set permissions on cache file at: {self.cache_path}: {e}")
+         except OSError:
+             logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+ 
+
+2026-01-16 14:27:10,755 - src.tools.run_test - INFO -   Patch content:
+diff --git a/spotipy/cache_handler.py b/spotipy/cache_handler.py
+index 936e81b..59f34a5 100644
+--- a/spotipy/cache_handler.py
++++ b/spotipy/cache_handler.py
+@@ -94,6 +94,11 @@ class CacheFileHandler(CacheHandler):
+         try:
+             with open(self.cache_path, "w", encoding='utf-8') as f:
+                 f.write(json.dumps(token_info, cls=self.encoder_cls))
++            # Set file permissions to 0o600 (owner read/write only)
++            try:
++                os.chmod(self.cache_path, 0o600)
++            except Exception as e:
++                logger.warning(f"Couldn't set permissions on cache file at: {self.cache_path}: {e}")
+         except OSError:
+             logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+ 
+
+2026-01-16 14:27:10,844 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:27:10,844 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:27:11,277 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:27:11,277 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:27:11,375 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/spotipy/cache_handler.py b/spotipy/cache_handler.py
+index 936e81b..59f34a5 100644
+--- a/spotipy/cache_handler.py
++++ b/spotipy/cache_handler.py
+@@ -94,6 +94,11 @@ class CacheFileHandler(CacheHandler):
+         try:
+             with open(self.cache_path, "w", encoding='utf-8') as f:
+                 f.write(json.dumps(token_info, cls=self.encoder_cls))
++            # Set file permissions to 0o600 (owner read/write only)
++            try:
++                os.chmod(self.cache_path, 0o600)
++            except Exception as e:
++                logger.warning(f"Couldn't set permissions on cache file at: {self.cache_path}: {e}")
+         except OSError:
+             logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+ 
+
+
+2026-01-16 14:27:11,375 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/spotipy/cache_handler.py b/spotipy/cache_handler.py
+index 936e81b..59f34a5 100644
+--- a/spotipy/cache_handler.py
++++ b/spotipy/cache_handler.py
+@@ -94,6 +94,11 @@ class CacheFileHandler(CacheHandler):
+         try:
+             with open(self.cache_path, "w", encoding='utf-8') as f:
+                 f.write(json.dumps(token_info, cls=self.encoder_cls))
++            # Set file permissions to 0o600 (owner read/write only)
++            try:
++                os.chmod(self.cache_path, 0o600)
++            except Exception as e:
++                logger.warning(f"Couldn't set permissions on cache file at: {self.cache_path}: {e}")
+         except OSError:
+             logger.warning(f"Couldn't write token to cache at: {self.cache_path}")
+ 
+
+
+2026-01-16 14:27:11,851 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 14:27:11,851 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 14:27:11,851 - src.tools.run_test - INFO - fix-run.sh output:
+..Couldn't write token to cache at: /tmp/tmpe67ryv4a/intermediate_file_component/cache.json
+.
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+OK
+
+2026-01-16 14:27:11,851 - src.tools.run_test - INFO - fix-run.sh output:
+..Couldn't write token to cache at: /tmp/tmpe67ryv4a/intermediate_file_component/cache.json
+.
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+OK
+
+2026-01-16 14:27:11,936 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:27:11,936 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:27:12,507 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:27:12,507 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:27:13,075 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:27:13,075 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:27:13,076 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.9.23, pytest-8.0.0, pluggy-1.6.0 -- /workspace/PoC_env/CVE-2025-27154/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/spotipy
+collecting ... collected 36 items / 1 deselected / 35 selected
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_badly_scoped_token_bails PASSED [  2%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_cache_handler PASSED      [  5%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_expired_token_refreshes PASSED [  8%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path PASSED [ 11%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path PASSED [ 14%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy PASSED [ 17%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_does_not_show_dialog_by_default PASSED [ 20%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 22%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_passes_state_from_constructor PASSED [ 25%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_passes_state_from_func_call PASSED [ 28%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_shows_dialog_when_requested PASSED [ 31%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_with_consistent_state PASSED [ 34%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_with_inconsistent_state PASSED [ 37%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_without_state PASSED [ 40%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_badly_scoped_token_bails PASSED [ 42%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_expired_token_returns_none PASSED [ 45%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path PASSED [ 48%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path PASSED [ 51%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy PASSED [ 54%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_does_not_show_dialog_by_default PASSED [ 57%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 60%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_passes_state_from_constructor PASSED [ 62%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_passes_state_from_func_call PASSED [ 65%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_shows_dialog_when_requested PASSED [ 68%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_badly_scoped_token_bails PASSED [ 71%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_expired_token_refreshes PASSED [ 74%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path PASSED [ 77%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path PASSED [ 80%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy PASSED [ 82%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_code_verifier_and_code_challenge_are_correct PASSED [ 85%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_generate_code_challenge_for_pkce PASSED [ 88%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_generate_code_verifier_for_pkce PASSED [ 91%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 94%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_passes_state_from_constructor PASSED [ 97%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_passes_state_from_func_call PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/unit/test_oauth.py::OAuthCacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::OAuthCacheTest::test_expired_token_refreshes
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:305: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyOAuth will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyOAuth as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyOAuth(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to SpotifyOAuth " +
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:580: DeprecationWarning: Calling get_cached_token directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyOAuth object will be " +
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:590: DeprecationWarning: Calling _save_token_info directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyOAuth object will be " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_expired_token_returns_none
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:1044: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyImplicitGrant will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyImplicitGrant as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyImplicitGrant(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:1206: DeprecationWarning: Calling get_cached_token directly on the SpotifyImplicitGrant object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyImplicitGrant " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:1217: DeprecationWarning: Calling _save_token_info directly on the SpotifyImplicitGrant object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyImplicitGrant " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_expired_token_refreshes
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:658: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyPKCE will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyPKCE as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyImplicitGrant(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to SpotifyPKCE " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:949: DeprecationWarning: Calling get_cached_token directly on the SpotifyPKCE object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyPKCE object will be " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:959: DeprecationWarning: Calling _save_token_info directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyOAuth object will be " +
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 35 passed, 1 deselected, 21 warnings in 0.20s =================
+
+2026-01-16 14:27:13,076 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.9.23, pytest-8.0.0, pluggy-1.6.0 -- /workspace/PoC_env/CVE-2025-27154/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/spotipy
+collecting ... collected 36 items / 1 deselected / 35 selected
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_badly_scoped_token_bails PASSED [  2%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_cache_handler PASSED      [  5%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_expired_token_refreshes PASSED [  8%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path PASSED [ 11%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path PASSED [ 14%]
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy PASSED [ 17%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_does_not_show_dialog_by_default PASSED [ 20%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 22%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_passes_state_from_constructor PASSED [ 25%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_passes_state_from_func_call PASSED [ 28%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthorizeUrl::test_get_authorize_url_shows_dialog_when_requested PASSED [ 31%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_with_consistent_state PASSED [ 34%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_with_inconsistent_state PASSED [ 37%]
+tests/unit/test_oauth.py::TestSpotifyOAuthGetAuthResponseInteractive::test_get_auth_response_without_state PASSED [ 40%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_badly_scoped_token_bails PASSED [ 42%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_expired_token_returns_none PASSED [ 45%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path PASSED [ 48%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path PASSED [ 51%]
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy PASSED [ 54%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_does_not_show_dialog_by_default PASSED [ 57%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 60%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_passes_state_from_constructor PASSED [ 62%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_passes_state_from_func_call PASSED [ 65%]
+tests/unit/test_oauth.py::TestSpotifyImplicitGrant::test_get_authorize_url_shows_dialog_when_requested PASSED [ 68%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_badly_scoped_token_bails PASSED [ 71%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_expired_token_refreshes PASSED [ 74%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path PASSED [ 77%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path PASSED [ 80%]
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy PASSED [ 82%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_code_verifier_and_code_challenge_are_correct PASSED [ 85%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_generate_code_challenge_for_pkce PASSED [ 88%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_generate_code_verifier_for_pkce PASSED [ 91%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_doesnt_pass_state_by_default PASSED [ 94%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_passes_state_from_constructor PASSED [ 97%]
+tests/unit/test_oauth.py::TestSpotifyPKCE::test_get_authorize_url_passes_state_from_func_call PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/unit/test_oauth.py::OAuthCacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::OAuthCacheTest::test_expired_token_refreshes
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:305: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyOAuth will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyOAuth as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyOAuth(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to SpotifyOAuth " +
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:580: DeprecationWarning: Calling get_cached_token directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyOAuth object will be " +
+
+tests/unit/test_oauth.py::OAuthCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:590: DeprecationWarning: Calling _save_token_info directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyOAuth object will be " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_expired_token_returns_none
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:1044: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyImplicitGrant will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyImplicitGrant as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyImplicitGrant(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:1206: DeprecationWarning: Calling get_cached_token directly on the SpotifyImplicitGrant object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyImplicitGrant " +
+
+tests/unit/test_oauth.py::ImplicitGrantCacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:1217: DeprecationWarning: Calling _save_token_info directly on the SpotifyImplicitGrant object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyImplicitGrant " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_badly_scoped_token_bails
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_expired_token_refreshes
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:658: DeprecationWarning: Specifying cache_path or username as arguments to SpotifyPKCE will be deprecated. Instead, please create a CacheFileHandler instance with the desired cache_path and username and pass it to SpotifyPKCE as the cache_handler. For example:
+  
+  	from spotipy.oauth2 import CacheFileHandler
+  	handler = CacheFileHandler(cache_path=cache_path, username=username)
+  	sp = spotipy.SpotifyImplicitGrant(client_id, client_secret, redirect_uri, cache_handler=handler)
+    warnings.warn("Specifying cache_path or username as arguments to SpotifyPKCE " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_gets_from_cache_path
+  /workspace/spotipy/spotipy/oauth2.py:949: DeprecationWarning: Calling get_cached_token directly on the SpotifyPKCE object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's get_cached_token method. You can replace:
+  	sp.get_cached_token()
+  
+  With:
+  	sp.validate_token(sp.cache_handler.get_cached_token())
+    warnings.warn("Calling get_cached_token directly on the SpotifyPKCE object will be " +
+
+tests/unit/test_oauth.py::SpotifyPKCECacheTest::test_saves_to_cache_path_legacy
+  /workspace/spotipy/spotipy/oauth2.py:959: DeprecationWarning: Calling _save_token_info directly on the SpotifyOAuth object will be deprecated. Instead, please specify a CacheFileHandler instance as the cache_handler in SpotifyOAuth and use the CacheFileHandler's save_token_to_cache method.
+    warnings.warn("Calling _save_token_info directly on the SpotifyOAuth object will be " +
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 35 passed, 1 deselected, 21 warnings in 0.20s =================
+
+2026-01-16 14:27:13,079 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:27:13,079 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:27:19,422 - src.agents.base - INFO - SingleAgent - LLM response (1062 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "Cache file was written with default permissions, potentially exposing sensitive OAuth tokens to other users (CWE-276).",
+  "fix": "After writing the cache file, permissions are explicitly set to 0o600 (owner read/write only) using os.chmod, ensuring only the file owner can access the token.",
+  "iterations": 1,
+  "files_modified": ["spotipy/cache_handler.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+
+**Verification Output:**
+```json
+{
+  "poc_result": {
+    "passed": true,
+    "vulnerability_fixed": true,
+    "analysis": "fix-run.sh completed with exit code 0 and all PoC tests passed (OK)."
+  },
+  "regression_result": {
+    "passed": true,
+    "tests_present": true,
+    "analysis": "unit_test.sh ran 35 tests, all passed (OK), no regressions."
+  },
+  "overall_verdict": "PASS"
+}
+```
+**Summary:**  
+The patch ensures the cache file is only accessible by its owner, fully addressing CWE-276. All security and regression tests pass. The vulnerability is fixed.
+2026-01-16 14:27:19,422 - src.agents.base - INFO - SingleAgent - LLM response (1062 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "Cache file was written with default permissions, potentially exposing sensitive OAuth tokens to other users (CWE-276).",
+  "fix": "After writing the cache file, permissions are explicitly set to 0o600 (owner read/write only) using os.chmod, ensuring only the file owner can access the token.",
+  "iterations": 1,
+  "files_modified": ["spotipy/cache_handler.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+
+**Verification Output:**
+```json
+{
+  "poc_result": {
+    "passed": true,
+    "vulnerability_fixed": true,
+    "analysis": "fix-run.sh completed with exit code 0 and all PoC tests passed (OK)."
+  },
+  "regression_result": {
+    "passed": true,
+    "tests_present": true,
+    "analysis": "unit_test.sh ran 35 tests, all passed (OK), no regressions."
+  },
+  "overall_verdict": "PASS"
+}
+```
+**Summary:**  
+The patch ensures the cache file is only accessible by its owner, fully addressing CWE-276. All security and regression tests pass. The vulnerability is fixed.
+2026-01-16 14:27:19,423 - orchestrator - INFO - Completed: Sample: CVE-2025-27154 | Status: success | Rounds: 1 | Duration: 29.1s
+2026-01-16 14:27:19,423 - orchestrator - INFO - Completed: Sample: CVE-2025-27154 | Status: success | Rounds: 1 | Duration: 29.1s
+2026-01-16 14:27:19,560 - __main__ - INFO - Extracted patch via /workspace/fix.patch (755 bytes)

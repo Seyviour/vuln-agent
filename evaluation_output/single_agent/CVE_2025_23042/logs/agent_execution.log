@@ -1,0 +1,1083 @@
+2026-01-16 14:28:09,620 - orchestrator - INFO - Starting single-agent patching run for CVE-2025-23042
+2026-01-16 14:28:09,620 - orchestrator - INFO - Starting single-agent patching run for CVE-2025-23042
+2026-01-16 14:28:09,632 - orchestrator - INFO - Using container: single_agent_cve-2025-23042_d2404405, work_dir: /workspace/gradio
+2026-01-16 14:28:09,632 - orchestrator - INFO - Using container: single_agent_cve-2025-23042_d2404405, work_dir: /workspace/gradio
+2026-01-16 14:28:09,633 - src.agents.base - INFO - SingleAgent - LLM call prompt (2216 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2025-23042
+**CWE:** ['CWE-285', 'CWE-250', 'CWE-269']
+**Affected File:** gradio/utils.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def is_allowed_file(
+    path: Path,
+    blocked_paths: Sequence[str | Path],
+    allowed_paths: Sequence[str | Path],
+    created_paths: Sequence[str | Path],
+) -> tuple[
+    bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+]:
+    in_blocklist = any(
+        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
+    )
+    if in_blocklist:
+        return False, "in_blocklist"
+    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
+        return True, "allowed"
+    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
+        return True, "created"
+    return False, "not_created_or_allowed"
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 14:28:09,633 - src.agents.base - INFO - SingleAgent - LLM call prompt (2216 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2025-23042
+**CWE:** ['CWE-285', 'CWE-250', 'CWE-269']
+**Affected File:** gradio/utils.py
+
+**Vulnerable Locations:**
+Not provided
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```Python
+def is_allowed_file(
+    path: Path,
+    blocked_paths: Sequence[str | Path],
+    allowed_paths: Sequence[str | Path],
+    created_paths: Sequence[str | Path],
+) -> tuple[
+    bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+]:
+    in_blocklist = any(
+        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
+    )
+    if in_blocklist:
+        return False, "in_blocklist"
+    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
+        return True, "allowed"
+    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
+        return True, "created"
+    return False, "not_created_or_allowed"
+```
+
+## Your Task
+
+Execute the complete patching workflow autonomously:
+
+1. **ANALYZE**: Read and understand the vulnerable code
+   - Use ReadFile to examine the full file
+   - Use FindClass to understand dependencies
+   - Identify the root cause based on CWE/CVE information
+   - Account for **all** listed vulnerable locations (multiple hunks/files may be affected)
+
+2. **PLAN**: Formulate your fix strategy
+   - Decide what needs to change and why
+   - Consider security completeness and edge cases
+   - Keep changes minimal and focused
+
+3. **IMPLEMENT**: Apply the patch
+   - Use EditCode to modify the vulnerable code
+   - Ensure complete, valid, syntactically correct code
+   - Preserve existing style and conventions
+
+4. **VERIFY**: Run tests to validate
+   - Use RunTest to execute PoC and unit tests
+   - Read test output carefully to determine pass/fail
+   - Verify both security fix and no regressions
+
+5. **ITERATE**: If tests fail, adjust and retry
+   - Analyze what went wrong
+   - Try a different approach
+   - Don't repeat the same mistake
+
+You have all the tools and knowledge you need. Work autonomously and systematically.
+
+Begin!
+
+2026-01-16 14:28:17,475 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:17,475 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:17,475 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1,
+  "end_line": 1000
+}
+2026-01-16 14:28:17,475 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1,
+  "end_line": 1000
+}
+2026-01-16 14:28:18,326 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:18,326 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:20,128 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:20,128 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:20,128 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_allowed_file",
+  "search_type": "all",
+  "file_pattern": "gradio/utils.py"
+}
+2026-01-16 14:28:20,128 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_allowed_file",
+  "search_type": "all",
+  "file_pattern": "gradio/utils.py"
+}
+2026-01-16 14:28:20,789 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:20,789 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:21,927 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:21,927 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:21,927 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_in_or_equal",
+  "search_type": "all",
+  "file_pattern": "gradio/utils.py"
+}
+2026-01-16 14:28:21,927 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_in_or_equal",
+  "search_type": "all",
+  "file_pattern": "gradio/utils.py"
+}
+2026-01-16 14:28:22,553 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:22,553 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:23,755 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:23,755 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:23,755 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_allowed_file",
+  "search_type": "all",
+  "file_pattern": "*.py"
+}
+2026-01-16 14:28:23,755 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_allowed_file",
+  "search_type": "all",
+  "file_pattern": "*.py"
+}
+2026-01-16 14:28:24,434 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:24,434 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:25,555 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:25,555 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:25,556 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1500,
+  "end_line": 1530
+}
+2026-01-16 14:28:25,556 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1500,
+  "end_line": 1530
+}
+2026-01-16 14:28:25,710 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:25,710 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:26,994 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:26,994 - src.agents.base - INFO - SingleAgent executing tool: FindClass
+2026-01-16 14:28:26,995 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_in_or_equal",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 14:28:26,995 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_in_or_equal",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 14:28:27,528 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:27,528 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 14:28:28,832 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:28,832 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:28,832 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1080,
+  "end_line": 1100
+}
+2026-01-16 14:28:28,832 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1080,
+  "end_line": 1100
+}
+2026-01-16 14:28:28,973 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:28,973 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:34,322 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:34,322 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:34,323 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "test/test_utils.py",
+  "start_line": 440,
+  "end_line": 490
+}
+2026-01-16 14:28:34,323 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "test/test_utils.py",
+  "start_line": 440,
+  "end_line": 490
+}
+2026-01-16 14:28:34,466 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:34,466 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:41,638 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:41,638 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:41,639 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/routes.py",
+  "start_line": 700,
+  "end_line": 740
+}
+2026-01-16 14:28:41,639 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/routes.py",
+  "start_line": 700,
+  "end_line": 740
+}
+2026-01-16 14:28:41,789 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:41,789 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:43,883 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:43,883 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:43,883 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/processing_utils.py",
+  "start_line": 520,
+  "end_line": 560
+}
+2026-01-16 14:28:43,883 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/processing_utils.py",
+  "start_line": 520,
+  "end_line": 560
+}
+2026-01-16 14:28:44,027 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:44,027 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:45,336 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:45,336 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:45,337 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1000,
+  "end_line": 1120
+}
+2026-01-16 14:28:45,337 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "start_line": 1000,
+  "end_line": 1120
+}
+2026-01-16 14:28:45,472 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:45,472 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:46,752 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:46,752 - src.agents.base - INFO - SingleAgent executing tool: ReadFile
+2026-01-16 14:28:46,752 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "test/test_utils.py",
+  "start_line": 1,
+  "end_line": 60
+}
+2026-01-16 14:28:46,752 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "test/test_utils.py",
+  "start_line": 1,
+  "end_line": 60
+}
+2026-01-16 14:28:46,887 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:28:46,887 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 14:29:05,703 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:29:05,703 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:29:05,704 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "old_code": "def is_allowed_file(\n    path: Path,\n    blocked_paths: Sequence[str | Path],\n    allowed_paths: Sequence[str | Path],\n    created_paths: Sequence[str | Path],\n) -> tuple[\n    bool, Literal[\"in_blocklist\", \"allowed\", \"created\", \"not_created_or_allowed\"]\n]:\n    in_blocklist = any(\n        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths\n    )\n    if in_blocklist:\n        return False, \"in_blocklist\"\n    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):\n        return True, \"allowed\"\n    if any(is_in_or_equal(path, created_path) for created_path in created_paths):\n        return True, \"created\"\n    return False, \"not_created_or_allowed\"",
+  "new_code": "def is_allowed_file(\n    path: Path,\n    blocked_paths: Sequence[str | Path],\n    allowed_paths: Sequence[str | Path],\n    created_paths: Sequence[str | Path],\n) -> tuple[\n    bool, Literal[\"in_blocklist\", \"allowed\", \"created\", \"not_created_or_allowed\"]\n]:\n    # Normalize and resolve the path to its absolute canonical form\n    resolved_path = abspath(path).resolve()\n    # Block if path traversal is detected (\"..\" in parts)\n    if any(part == \"..\" for part in resolved_path.parts):\n        return False, \"in_blocklist\"\n    # Block if in blocklist (blocklist always takes precedence)\n    in_blocklist = any(\n        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths\n    )\n    if in_blocklist:\n        return False, \"in_blocklist\"\n    # Allow if in allowlist\n    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):\n        return True, \"allowed\"\n    # Allow if in created paths\n    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):\n        return True, \"created\"\n    return False, \"not_created_or_allowed\"",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:29:05,704 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "old_code": "def is_allowed_file(\n    path: Path,\n    blocked_paths: Sequence[str | Path],\n    allowed_paths: Sequence[str | Path],\n    created_paths: Sequence[str | Path],\n) -> tuple[\n    bool, Literal[\"in_blocklist\", \"allowed\", \"created\", \"not_created_or_allowed\"]\n]:\n    in_blocklist = any(\n        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths\n    )\n    if in_blocklist:\n        return False, \"in_blocklist\"\n    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):\n        return True, \"allowed\"\n    if any(is_in_or_equal(path, created_path) for created_path in created_paths):\n        return True, \"created\"\n    return False, \"not_created_or_allowed\"",
+  "new_code": "def is_allowed_file(\n    path: Path,\n    blocked_paths: Sequence[str | Path],\n    allowed_paths: Sequence[str | Path],\n    created_paths: Sequence[str | Path],\n) -> tuple[\n    bool, Literal[\"in_blocklist\", \"allowed\", \"created\", \"not_created_or_allowed\"]\n]:\n    # Normalize and resolve the path to its absolute canonical form\n    resolved_path = abspath(path).resolve()\n    # Block if path traversal is detected (\"..\" in parts)\n    if any(part == \"..\" for part in resolved_path.parts):\n        return False, \"in_blocklist\"\n    # Block if in blocklist (blocklist always takes precedence)\n    in_blocklist = any(\n        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths\n    )\n    if in_blocklist:\n        return False, \"in_blocklist\"\n    # Allow if in allowlist\n    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):\n        return True, \"allowed\"\n    # Allow if in created paths\n    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):\n        return True, \"created\"\n    return False, \"not_created_or_allowed\"",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:29:05,875 - src.tools.edit_code - INFO - EditCodeTool: Writing 51214 chars to gradio/utils.py (match_type=exact)
+2026-01-16 14:29:05,875 - src.tools.edit_code - INFO - EditCodeTool: Writing 51214 chars to gradio/utils.py (match_type=exact)
+2026-01-16 14:29:06,006 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:29:06,006 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:29:07,153 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:29:07,153 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:29:07,153 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "gradio/utils.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:29:07,153 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "gradio/utils.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   include_paths: ['gradio/utils.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   include_paths: ['gradio/utils.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'gradio/utils.py' ':(exclude)hand_test.py'
+2026-01-16 14:29:07,473 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'gradio/utils.py' ':(exclude)hand_test.py'
+2026-01-16 14:29:07,632 - src.tools.run_test - INFO -   Generated patch: 1380 bytes, 30 lines
+2026-01-16 14:29:07,632 - src.tools.run_test - INFO -   Generated patch: 1380 bytes, 30 lines
+2026-01-16 14:29:07,632 - src.tools.run_test - INFO -   Patch content:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..0a328be 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1512,14 +1512,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+2026-01-16 14:29:07,632 - src.tools.run_test - INFO -   Patch content:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..0a328be 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1512,14 +1512,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+2026-01-16 14:29:07,733 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:07,733 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:09,461 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:29:09,461 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:29:09,563 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..0a328be 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1512,14 +1512,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+
+2026-01-16 14:29:09,563 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..0a328be 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1512,14 +1512,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+
+2026-01-16 14:29:12,491 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 14:29:12,491 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 14:29:12,492 - src.tools.run_test - INFO - fix-run.sh output:
+
+- FAILED: Key test: access blocked directory with different case
+  - Path:      /tmp/gradio_test_app/BLOCKED_DIR/some_file.txt
+  - Expected:  allow=False, reason='in_blocklist'
+  - Actual:    allow=True, reason='allowed'
+
+----------------------------------------------------
+Result: FAILED (1 failed, 3 passed)
+----------------------------------------------------
+
+2026-01-16 14:29:12,492 - src.tools.run_test - INFO - fix-run.sh output:
+
+- FAILED: Key test: access blocked directory with different case
+  - Path:      /tmp/gradio_test_app/BLOCKED_DIR/some_file.txt
+  - Expected:  allow=False, reason='in_blocklist'
+  - Actual:    allow=True, reason='allowed'
+
+----------------------------------------------------
+Result: FAILED (1 failed, 3 passed)
+----------------------------------------------------
+
+2026-01-16 14:29:12,587 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:12,587 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:13,232 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:29:13,232 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:29:15,968 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:29:15,968 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:29:15,968 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.10.16, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2025-23042/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/gradio
+configfile: pyproject.toml
+plugins: anyio-4.9.0
+collecting ... collected 102 items / 68 deselected / 34 selected
+
+test/test_routes.py::TestShowAPI::test_show_api_false_when_is_wasm_true PASSED [  2%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api-/gradio_api/-None-http://localhost:7860] PASSED [  5%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test-/gradio_api/demo/test-None-http://localhost:7860] PASSED [  8%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test-None-http://localhost:7860] PASSED [ 11%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test/-/gradio-http://localhost:7860/gradio] PASSED [ 14%]
+test/test_routes.py::test_get_root_url[http://localhost:7860/demo/test?query=1-/demo/test-/gradio/-http://localhost:7860/gradio] PASSED [ 17%]
+test/test_routes.py::test_get_root_url[https://localhost:7860/demo/test?query=1-/demo/test-/gradio/-https://localhost:7860/gradio] PASSED [ 20%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-/playground-https://www.gradio.app/playground] PASSED [ 23%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-http://www.gradio.app/-http://www.gradio.app] PASSED [ 26%]
+test/test_routes.py::test_get_root_url_headers[headers0-/gradio/-/-http://gradio.app/gradio] PASSED [ 29%]
+test/test_routes.py::test_get_root_url_headers[headers1-/gradio/-/-http://gradio.app/gradio] PASSED [ 32%]
+test/test_routes.py::test_get_root_url_headers[headers2-/gradio/-/-https://gradio.app/gradio] PASSED [ 35%]
+test/test_routes.py::test_get_root_url_headers[headers3-/gradio/-/-http://gradio.dev/gradio] PASSED [ 38%]
+test/test_routes.py::test_get_root_url_headers[headers4-/gradio/-/config-http://gradio.dev/gradio] PASSED [ 41%]
+test/test_routes.py::test_get_root_url_headers[headers5-/-/-https://gradio.dev] PASSED [ 44%]
+test/test_routes.py::test_get_root_url_headers[headers6-/-/-https://gradio.dev] PASSED [ 47%]
+test/test_routes.py::test_get_root_url_headers[headers7-http://google.com-/-http://google.com] PASSED [ 50%]
+test/test_routes.py::test_compare_passwords_securely PASSED              [ 52%]
+test/test_routes.py::test_starts_with_protocol[http://localhost:7860/-True] PASSED [ 55%]
+test/test_routes.py::test_starts_with_protocol[https://localhost:7860/-True] PASSED [ 58%]
+test/test_routes.py::test_starts_with_protocol[ftp://localhost:7860/-True] PASSED [ 61%]
+test/test_routes.py::test_starts_with_protocol[smb://example.com-True] PASSED [ 64%]
+test/test_routes.py::test_starts_with_protocol[ipfs://QmTzQ1Nj5R9BzF1djVQv8gvzZxVkJb1vhrLcXL1QyJzZE-True] PASSED [ 67%]
+test/test_routes.py::test_starts_with_protocol[usr/local/bin-False] PASSED [ 70%]
+test/test_routes.py::test_starts_with_protocol[localhost:7860-False] PASSED [ 73%]
+test/test_routes.py::test_starts_with_protocol[localhost-False] PASSED   [ 76%]
+test/test_routes.py::test_starts_with_protocol[C:/Users/username-False] PASSED [ 79%]
+test/test_routes.py::test_starts_with_protocol[//path-True] PASSED       [ 82%]
+test/test_routes.py::test_starts_with_protocol[\\\\path-True] PASSED     [ 85%]
+test/test_routes.py::test_starts_with_protocol[/usr/bin//test-False] PASSED [ 88%]
+test/test_routes.py::test_starts_with_protocol[/\\10.0.225.200/share-True] PASSED [ 91%]
+test/test_routes.py::test_starts_with_protocol[\\/10.0.225.200/share-True] PASSED [ 94%]
+test/test_routes.py::test_starts_with_protocol[/home//user-False] PASSED [ 97%]
+test/test_routes.py::test_starts_with_protocol[C:\\folder\\file-False] PASSED [100%]
+
+================ 34 passed, 68 deselected, 3 warnings in 0.25s =================
+
+2026-01-16 14:29:15,968 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.10.16, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2025-23042/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/gradio
+configfile: pyproject.toml
+plugins: anyio-4.9.0
+collecting ... collected 102 items / 68 deselected / 34 selected
+
+test/test_routes.py::TestShowAPI::test_show_api_false_when_is_wasm_true PASSED [  2%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api-/gradio_api/-None-http://localhost:7860] PASSED [  5%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test-/gradio_api/demo/test-None-http://localhost:7860] PASSED [  8%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test-None-http://localhost:7860] PASSED [ 11%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test/-/gradio-http://localhost:7860/gradio] PASSED [ 14%]
+test/test_routes.py::test_get_root_url[http://localhost:7860/demo/test?query=1-/demo/test-/gradio/-http://localhost:7860/gradio] PASSED [ 17%]
+test/test_routes.py::test_get_root_url[https://localhost:7860/demo/test?query=1-/demo/test-/gradio/-https://localhost:7860/gradio] PASSED [ 20%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-/playground-https://www.gradio.app/playground] PASSED [ 23%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-http://www.gradio.app/-http://www.gradio.app] PASSED [ 26%]
+test/test_routes.py::test_get_root_url_headers[headers0-/gradio/-/-http://gradio.app/gradio] PASSED [ 29%]
+test/test_routes.py::test_get_root_url_headers[headers1-/gradio/-/-http://gradio.app/gradio] PASSED [ 32%]
+test/test_routes.py::test_get_root_url_headers[headers2-/gradio/-/-https://gradio.app/gradio] PASSED [ 35%]
+test/test_routes.py::test_get_root_url_headers[headers3-/gradio/-/-http://gradio.dev/gradio] PASSED [ 38%]
+test/test_routes.py::test_get_root_url_headers[headers4-/gradio/-/config-http://gradio.dev/gradio] PASSED [ 41%]
+test/test_routes.py::test_get_root_url_headers[headers5-/-/-https://gradio.dev] PASSED [ 44%]
+test/test_routes.py::test_get_root_url_headers[headers6-/-/-https://gradio.dev] PASSED [ 47%]
+test/test_routes.py::test_get_root_url_headers[headers7-http://google.com-/-http://google.com] PASSED [ 50%]
+test/test_routes.py::test_compare_passwords_securely PASSED              [ 52%]
+test/test_routes.py::test_starts_with_protocol[http://localhost:7860/-True] PASSED [ 55%]
+test/test_routes.py::test_starts_with_protocol[https://localhost:7860/-True] PASSED [ 58%]
+test/test_routes.py::test_starts_with_protocol[ftp://localhost:7860/-True] PASSED [ 61%]
+test/test_routes.py::test_starts_with_protocol[smb://example.com-True] PASSED [ 64%]
+test/test_routes.py::test_starts_with_protocol[ipfs://QmTzQ1Nj5R9BzF1djVQv8gvzZxVkJb1vhrLcXL1QyJzZE-True] PASSED [ 67%]
+test/test_routes.py::test_starts_with_protocol[usr/local/bin-False] PASSED [ 70%]
+test/test_routes.py::test_starts_with_protocol[localhost:7860-False] PASSED [ 73%]
+test/test_routes.py::test_starts_with_protocol[localhost-False] PASSED   [ 76%]
+test/test_routes.py::test_starts_with_protocol[C:/Users/username-False] PASSED [ 79%]
+test/test_routes.py::test_starts_with_protocol[//path-True] PASSED       [ 82%]
+test/test_routes.py::test_starts_with_protocol[\\\\path-True] PASSED     [ 85%]
+test/test_routes.py::test_starts_with_protocol[/usr/bin//test-False] PASSED [ 88%]
+test/test_routes.py::test_starts_with_protocol[/\\10.0.225.200/share-True] PASSED [ 91%]
+test/test_routes.py::test_starts_with_protocol[\\/10.0.225.200/share-True] PASSED [ 94%]
+test/test_routes.py::test_starts_with_protocol[/home//user-False] PASSED [ 97%]
+test/test_routes.py::test_starts_with_protocol[C:\\folder\\file-False] PASSED [100%]
+
+================ 34 passed, 68 deselected, 3 warnings in 0.25s =================
+
+2026-01-16 14:29:15,969 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:29:15,969 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:29:34,069 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:29:34,069 - src.agents.base - INFO - SingleAgent executing tool: EditCode
+2026-01-16 14:29:34,070 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "old_code": "def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:\n    \"\"\"\n    True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the\n    same, returns False otherwise.\n    Parameters:\n        path_1: str or Path (to file or directory)\n        path_2: str or Path (to file or directory)\n    \"\"\"\n    path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()\n    try:\n        path_1.relative_to(path_2)\n        return True\n    except ValueError:\n        return False",
+  "new_code": "def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:\n    \"\"\"\n    True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the\n    same, returns False otherwise. Comparison is case-insensitive for security.\n    Parameters:\n        path_1: str or Path (to file or directory)\n        path_2: str or Path (to file or directory)\n    \"\"\"\n    path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()\n    # Compare as lower-case strings for case-insensitivity\n    path_1_str = str(path_1).lower()\n    path_2_str = str(path_2).lower()\n    if path_1_str == path_2_str:\n        return True\n    # Check if path_1 is a descendant of path_2 (case-insensitive)\n    if path_1_str.startswith(path_2_str.rstrip(\"/\\\\\") + os.sep.lower()):\n        return True\n    try:\n        # Fallback to original logic for completeness\n        path_1.relative_to(path_2)\n        return True\n    except ValueError:\n        return False",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:29:34,070 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "gradio/utils.py",
+  "old_code": "def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:\n    \"\"\"\n    True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the\n    same, returns False otherwise.\n    Parameters:\n        path_1: str or Path (to file or directory)\n        path_2: str or Path (to file or directory)\n    \"\"\"\n    path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()\n    try:\n        path_1.relative_to(path_2)\n        return True\n    except ValueError:\n        return False",
+  "new_code": "def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:\n    \"\"\"\n    True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the\n    same, returns False otherwise. Comparison is case-insensitive for security.\n    Parameters:\n        path_1: str or Path (to file or directory)\n        path_2: str or Path (to file or directory)\n    \"\"\"\n    path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()\n    # Compare as lower-case strings for case-insensitivity\n    path_1_str = str(path_1).lower()\n    path_2_str = str(path_2).lower()\n    if path_1_str == path_2_str:\n        return True\n    # Check if path_1 is a descendant of path_2 (case-insensitive)\n    if path_1_str.startswith(path_2_str.rstrip(\"/\\\\\") + os.sep.lower()):\n        return True\n    try:\n        # Fallback to original logic for completeness\n        path_1.relative_to(path_2)\n        return True\n    except ValueError:\n        return False",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 14:29:34,215 - src.tools.edit_code - INFO - EditCodeTool: Writing 51659 chars to gradio/utils.py (match_type=exact)
+2026-01-16 14:29:34,215 - src.tools.edit_code - INFO - EditCodeTool: Writing 51659 chars to gradio/utils.py (match_type=exact)
+2026-01-16 14:29:34,345 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:29:34,345 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 14:29:35,494 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:29:35,494 - src.agents.base - INFO - SingleAgent executing tool: RunTest
+2026-01-16 14:29:35,494 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "gradio/utils.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:29:35,494 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 180,
+  "include_paths": [
+    "gradio/utils.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 14:29:35,808 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:29:35,808 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['hand_test.py']
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   include_paths: ['gradio/utils.py']
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   include_paths: ['gradio/utils.py']
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['hand_test.py']
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'gradio/utils.py' ':(exclude)hand_test.py'
+2026-01-16 14:29:35,809 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'gradio/utils.py' ':(exclude)hand_test.py'
+2026-01-16 14:29:35,939 - src.tools.run_test - INFO -   Generated patch: 2432 bytes, 54 lines
+2026-01-16 14:29:35,939 - src.tools.run_test - INFO -   Generated patch: 2432 bytes, 54 lines
+2026-01-16 14:29:35,939 - src.tools.run_test - INFO -   Patch content:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..5c6eb2d 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1085,13 +1085,22 @@ def abspath(path: str | Path) -> Path:
+ def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:
+     """
+     True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the
+-    same, returns False otherwise.
++    same, returns False otherwise. Comparison is case-insensitive for security.
+     Parameters:
+         path_1: str or Path (to file or directory)
+         path_2: str or Path (to file or directory)
+     """
+     path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()
++    # Compare as lower-case strings for case-insensitivity
++    path_1_str = str(path_1).lower()
++    path_2_str = str(path_2).lower()
++    if path_1_str == path_2_str:
++        return True
++    # Check if path_1 is a descendant of path_2 (case-insensitive)
++    if path_1_str.startswith(path_2_str.rstrip("/\\") + os.sep.lower()):
++        return True
+     try:
++        # Fallback to original logic for completeness
+         path_1.relative_to(path_2)
+         return True
+     except ValueError:
+@@ -1512,14 +1521,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+2026-01-16 14:29:35,939 - src.tools.run_test - INFO -   Patch content:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..5c6eb2d 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1085,13 +1085,22 @@ def abspath(path: str | Path) -> Path:
+ def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:
+     """
+     True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the
+-    same, returns False otherwise.
++    same, returns False otherwise. Comparison is case-insensitive for security.
+     Parameters:
+         path_1: str or Path (to file or directory)
+         path_2: str or Path (to file or directory)
+     """
+     path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()
++    # Compare as lower-case strings for case-insensitivity
++    path_1_str = str(path_1).lower()
++    path_2_str = str(path_2).lower()
++    if path_1_str == path_2_str:
++        return True
++    # Check if path_1 is a descendant of path_2 (case-insensitive)
++    if path_1_str.startswith(path_2_str.rstrip("/\\") + os.sep.lower()):
++        return True
+     try:
++        # Fallback to original logic for completeness
+         path_1.relative_to(path_2)
+         return True
+     except ValueError:
+@@ -1512,14 +1521,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+2026-01-16 14:29:36,028 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:36,028 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:36,525 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:29:36,525 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 14:29:36,620 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..5c6eb2d 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1085,13 +1085,22 @@ def abspath(path: str | Path) -> Path:
+ def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:
+     """
+     True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the
+-    same, returns False otherwise.
++    same, returns False otherwise. Comparison is case-insensitive for security.
+     Parameters:
+         path_1: str or Path (to file or directory)
+         path_2: str or Path (to file or directory)
+     """
+     path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()
++    # Compare as lower-case strings for case-insensitivity
++    path_1_str = str(path_1).lower()
++    path_2_str = str(path_2).lower()
++    if path_1_str == path_2_str:
++        return True
++    # Check if path_1 is a descendant of path_2 (case-insensitive)
++    if path_1_str.startswith(path_2_str.rstrip("/\\") + os.sep.lower()):
++        return True
+     try:
++        # Fallback to original logic for completeness
+         path_1.relative_to(path_2)
+         return True
+     except ValueError:
+@@ -1512,14 +1521,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+
+2026-01-16 14:29:36,620 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/gradio/utils.py b/gradio/utils.py
+index 080a3d1..5c6eb2d 100644
+--- a/gradio/utils.py
++++ b/gradio/utils.py
+@@ -1085,13 +1085,22 @@ def abspath(path: str | Path) -> Path:
+ def is_in_or_equal(path_1: str | Path, path_2: str | Path) -> bool:
+     """
+     True if path_1 is a descendant (i.e. located within) path_2 or if the paths are the
+-    same, returns False otherwise.
++    same, returns False otherwise. Comparison is case-insensitive for security.
+     Parameters:
+         path_1: str or Path (to file or directory)
+         path_2: str or Path (to file or directory)
+     """
+     path_1, path_2 = abspath(path_1).resolve(), abspath(path_2).resolve()
++    # Compare as lower-case strings for case-insensitivity
++    path_1_str = str(path_1).lower()
++    path_2_str = str(path_2).lower()
++    if path_1_str == path_2_str:
++        return True
++    # Check if path_1 is a descendant of path_2 (case-insensitive)
++    if path_1_str.startswith(path_2_str.rstrip("/\\") + os.sep.lower()):
++        return True
+     try:
++        # Fallback to original logic for completeness
+         path_1.relative_to(path_2)
+         return True
+     except ValueError:
+@@ -1512,14 +1521,22 @@ def is_allowed_file(
+ ) -> tuple[
+     bool, Literal["in_blocklist", "allowed", "created", "not_created_or_allowed"]
+ ]:
++    # Normalize and resolve the path to its absolute canonical form
++    resolved_path = abspath(path).resolve()
++    # Block if path traversal is detected (".." in parts)
++    if any(part == ".." for part in resolved_path.parts):
++        return False, "in_blocklist"
++    # Block if in blocklist (blocklist always takes precedence)
+     in_blocklist = any(
+-        is_in_or_equal(path, blocked_path) for blocked_path in blocked_paths
++        is_in_or_equal(resolved_path, blocked_path) for blocked_path in blocked_paths
+     )
+     if in_blocklist:
+         return False, "in_blocklist"
+-    if any(is_in_or_equal(path, allowed_path) for allowed_path in allowed_paths):
++    # Allow if in allowlist
++    if any(is_in_or_equal(resolved_path, allowed_path) for allowed_path in allowed_paths):
+         return True, "allowed"
+-    if any(is_in_or_equal(path, created_path) for created_path in created_paths):
++    # Allow if in created paths
++    if any(is_in_or_equal(resolved_path, created_path) for created_path in created_paths):
+         return True, "created"
+     return False, "not_created_or_allowed"
+ 
+
+
+2026-01-16 14:29:39,059 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 14:29:39,059 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 14:29:39,059 - src.tools.run_test - INFO - fix-run.sh output:
+
+----------------------------------------------------
+Result: PASSED (4 passed)
+----------------------------------------------------
+
+2026-01-16 14:29:39,059 - src.tools.run_test - INFO - fix-run.sh output:
+
+----------------------------------------------------
+Result: PASSED (4 passed)
+----------------------------------------------------
+
+2026-01-16 14:29:39,142 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:39,142 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 14:29:39,803 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:29:39,803 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 14:29:42,489 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:29:42,489 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 14:29:42,489 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.10.16, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2025-23042/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/gradio
+configfile: pyproject.toml
+plugins: anyio-4.9.0
+collecting ... collected 102 items / 68 deselected / 34 selected
+
+test/test_routes.py::TestShowAPI::test_show_api_false_when_is_wasm_true PASSED [  2%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api-/gradio_api/-None-http://localhost:7860] PASSED [  5%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test-/gradio_api/demo/test-None-http://localhost:7860] PASSED [  8%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test-None-http://localhost:7860] PASSED [ 11%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test/-/gradio-http://localhost:7860/gradio] PASSED [ 14%]
+test/test_routes.py::test_get_root_url[http://localhost:7860/demo/test?query=1-/demo/test-/gradio/-http://localhost:7860/gradio] PASSED [ 17%]
+test/test_routes.py::test_get_root_url[https://localhost:7860/demo/test?query=1-/demo/test-/gradio/-https://localhost:7860/gradio] PASSED [ 20%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-/playground-https://www.gradio.app/playground] PASSED [ 23%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-http://www.gradio.app/-http://www.gradio.app] PASSED [ 26%]
+test/test_routes.py::test_get_root_url_headers[headers0-/gradio/-/-http://gradio.app/gradio] PASSED [ 29%]
+test/test_routes.py::test_get_root_url_headers[headers1-/gradio/-/-http://gradio.app/gradio] PASSED [ 32%]
+test/test_routes.py::test_get_root_url_headers[headers2-/gradio/-/-https://gradio.app/gradio] PASSED [ 35%]
+test/test_routes.py::test_get_root_url_headers[headers3-/gradio/-/-http://gradio.dev/gradio] PASSED [ 38%]
+test/test_routes.py::test_get_root_url_headers[headers4-/gradio/-/config-http://gradio.dev/gradio] PASSED [ 41%]
+test/test_routes.py::test_get_root_url_headers[headers5-/-/-https://gradio.dev] PASSED [ 44%]
+test/test_routes.py::test_get_root_url_headers[headers6-/-/-https://gradio.dev] PASSED [ 47%]
+test/test_routes.py::test_get_root_url_headers[headers7-http://google.com-/-http://google.com] PASSED [ 50%]
+test/test_routes.py::test_compare_passwords_securely PASSED              [ 52%]
+test/test_routes.py::test_starts_with_protocol[http://localhost:7860/-True] PASSED [ 55%]
+test/test_routes.py::test_starts_with_protocol[https://localhost:7860/-True] PASSED [ 58%]
+test/test_routes.py::test_starts_with_protocol[ftp://localhost:7860/-True] PASSED [ 61%]
+test/test_routes.py::test_starts_with_protocol[smb://example.com-True] PASSED [ 64%]
+test/test_routes.py::test_starts_with_protocol[ipfs://QmTzQ1Nj5R9BzF1djVQv8gvzZxVkJb1vhrLcXL1QyJzZE-True] PASSED [ 67%]
+test/test_routes.py::test_starts_with_protocol[usr/local/bin-False] PASSED [ 70%]
+test/test_routes.py::test_starts_with_protocol[localhost:7860-False] PASSED [ 73%]
+test/test_routes.py::test_starts_with_protocol[localhost-False] PASSED   [ 76%]
+test/test_routes.py::test_starts_with_protocol[C:/Users/username-False] PASSED [ 79%]
+test/test_routes.py::test_starts_with_protocol[//path-True] PASSED       [ 82%]
+test/test_routes.py::test_starts_with_protocol[\\\\path-True] PASSED     [ 85%]
+test/test_routes.py::test_starts_with_protocol[/usr/bin//test-False] PASSED [ 88%]
+test/test_routes.py::test_starts_with_protocol[/\\10.0.225.200/share-True] PASSED [ 91%]
+test/test_routes.py::test_starts_with_protocol[\\/10.0.225.200/share-True] PASSED [ 94%]
+test/test_routes.py::test_starts_with_protocol[/home//user-False] PASSED [ 97%]
+test/test_routes.py::test_starts_with_protocol[C:\\folder\\file-False] PASSED [100%]
+
+================ 34 passed, 68 deselected, 3 warnings in 0.15s =================
+
+2026-01-16 14:29:42,489 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.10.16, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2025-23042/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/gradio
+configfile: pyproject.toml
+plugins: anyio-4.9.0
+collecting ... collected 102 items / 68 deselected / 34 selected
+
+test/test_routes.py::TestShowAPI::test_show_api_false_when_is_wasm_true PASSED [  2%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api-/gradio_api/-None-http://localhost:7860] PASSED [  5%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test-/gradio_api/demo/test-None-http://localhost:7860] PASSED [  8%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test-None-http://localhost:7860] PASSED [ 11%]
+test/test_routes.py::test_get_root_url[http://localhost:7860//gradio_api/demo/test?query=1-/gradio_api/demo/test/-/gradio-http://localhost:7860/gradio] PASSED [ 14%]
+test/test_routes.py::test_get_root_url[http://localhost:7860/demo/test?query=1-/demo/test-/gradio/-http://localhost:7860/gradio] PASSED [ 17%]
+test/test_routes.py::test_get_root_url[https://localhost:7860/demo/test?query=1-/demo/test-/gradio/-https://localhost:7860/gradio] PASSED [ 20%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-/playground-https://www.gradio.app/playground] PASSED [ 23%]
+test/test_routes.py::test_get_root_url[https://www.gradio.app/playground/-/gradio_api/-http://www.gradio.app/-http://www.gradio.app] PASSED [ 26%]
+test/test_routes.py::test_get_root_url_headers[headers0-/gradio/-/-http://gradio.app/gradio] PASSED [ 29%]
+test/test_routes.py::test_get_root_url_headers[headers1-/gradio/-/-http://gradio.app/gradio] PASSED [ 32%]
+test/test_routes.py::test_get_root_url_headers[headers2-/gradio/-/-https://gradio.app/gradio] PASSED [ 35%]
+test/test_routes.py::test_get_root_url_headers[headers3-/gradio/-/-http://gradio.dev/gradio] PASSED [ 38%]
+test/test_routes.py::test_get_root_url_headers[headers4-/gradio/-/config-http://gradio.dev/gradio] PASSED [ 41%]
+test/test_routes.py::test_get_root_url_headers[headers5-/-/-https://gradio.dev] PASSED [ 44%]
+test/test_routes.py::test_get_root_url_headers[headers6-/-/-https://gradio.dev] PASSED [ 47%]
+test/test_routes.py::test_get_root_url_headers[headers7-http://google.com-/-http://google.com] PASSED [ 50%]
+test/test_routes.py::test_compare_passwords_securely PASSED              [ 52%]
+test/test_routes.py::test_starts_with_protocol[http://localhost:7860/-True] PASSED [ 55%]
+test/test_routes.py::test_starts_with_protocol[https://localhost:7860/-True] PASSED [ 58%]
+test/test_routes.py::test_starts_with_protocol[ftp://localhost:7860/-True] PASSED [ 61%]
+test/test_routes.py::test_starts_with_protocol[smb://example.com-True] PASSED [ 64%]
+test/test_routes.py::test_starts_with_protocol[ipfs://QmTzQ1Nj5R9BzF1djVQv8gvzZxVkJb1vhrLcXL1QyJzZE-True] PASSED [ 67%]
+test/test_routes.py::test_starts_with_protocol[usr/local/bin-False] PASSED [ 70%]
+test/test_routes.py::test_starts_with_protocol[localhost:7860-False] PASSED [ 73%]
+test/test_routes.py::test_starts_with_protocol[localhost-False] PASSED   [ 76%]
+test/test_routes.py::test_starts_with_protocol[C:/Users/username-False] PASSED [ 79%]
+test/test_routes.py::test_starts_with_protocol[//path-True] PASSED       [ 82%]
+test/test_routes.py::test_starts_with_protocol[\\\\path-True] PASSED     [ 85%]
+test/test_routes.py::test_starts_with_protocol[/usr/bin//test-False] PASSED [ 88%]
+test/test_routes.py::test_starts_with_protocol[/\\10.0.225.200/share-True] PASSED [ 91%]
+test/test_routes.py::test_starts_with_protocol[\\/10.0.225.200/share-True] PASSED [ 94%]
+test/test_routes.py::test_starts_with_protocol[/home//user-False] PASSED [ 97%]
+test/test_routes.py::test_starts_with_protocol[C:\\folder\\file-False] PASSED [100%]
+
+================ 34 passed, 68 deselected, 3 warnings in 0.15s =================
+
+2026-01-16 14:29:42,490 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:29:42,490 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 14:29:52,190 - src.agents.base - INFO - SingleAgent - LLM response (499 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "Improper authorization due to case-sensitive path comparison allowed bypassing blocklists on case-insensitive filesystems.",
+  "fix": "Path comparison in is_in_or_equal is now case-insensitive, preventing blocklist bypass via case changes. All paths are normalized and compared as lower-case strings.",
+  "iterations": 2,
+  "files_modified": ["gradio/utils.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+2026-01-16 14:29:52,190 - src.agents.base - INFO - SingleAgent - LLM response (499 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "Improper authorization due to case-sensitive path comparison allowed bypassing blocklists on case-insensitive filesystems.",
+  "fix": "Path comparison in is_in_or_equal is now case-insensitive, preventing blocklist bypass via case changes. All paths are normalized and compared as lower-case strings.",
+  "iterations": 2,
+  "files_modified": ["gradio/utils.py"],
+  "verification": {
+    "poc_passed": true,
+    "regression_passed": true
+  }
+}
+```
+2026-01-16 14:29:52,192 - orchestrator - INFO - Completed: Sample: CVE-2025-23042 | Status: success | Rounds: 2 | Duration: 102.6s
+2026-01-16 14:29:52,192 - orchestrator - INFO - Completed: Sample: CVE-2025-23042 | Status: success | Rounds: 2 | Duration: 102.6s
+2026-01-16 14:29:52,331 - __main__ - INFO - Extracted patch via /workspace/fix.patch (2433 bytes)

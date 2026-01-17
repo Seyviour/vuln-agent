@@ -1,0 +1,2127 @@
+2026-01-16 19:45:30,538 - task-CVE-2023-6831-8373870784 - INFO - Running multi-agent for CVE-2023-6831 in container multi_agent_eval_cve-2023-6831_tmp_2feb211e
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: ReadFile
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: FindClass
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: EditCode
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: RunTest
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: SymbolVerify
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered tool: AskAgent
+2026-01-16 19:45:30,591 - src.tools.registry - DEBUG - Registered 6 default tools
+2026-01-16 19:45:30,592 - src.agents.base - INFO - CoordinatorAgent - LLM call prompt (1784 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2023-6831
+**CWE:** ['CWE-73', 'CWE-22']
+**Affected File:** mlflow/utils/uri.py
+**Vulnerable Locations:**
+Not provided.
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```python
+def validate_path_is_safe(path):
+    """
+    Validates that the specified path is safe to join with a trusted prefix. This is a security
+    measure to prevent path traversal attacks.
+    A valid path should:
+        not contain separators other than '/'
+        not contain .. to navigate to parent dir in path
+        not be an absolute path
+    """
+    from mlflow.utils.file_utils import local_file_uri_to_path
+
+    exc = MlflowException(f"Invalid path: {path}", error_code=INVALID_PARAMETER_VALUE)
+    if any((s in path) for s in ("#", "%23")):
+        raise exc
+
+    if is_file_uri(path):
+        path = local_file_uri_to_path(path)
+    if (
+        any((s in path) for s in _OS_ALT_SEPS)
+        or ".." in path.split("/")
+        or pathlib.PureWindowsPath(path).is_absolute()
+        or pathlib.PurePosixPath(path).is_absolute()
+        or (is_windows() and len(path) >= 2 and path[1] == ":")
+    ):
+        raise exc
+```
+
+## Get Started
+
+1. First, ask ContextKnowledgeAgent to analyze the vulnerable files/locations and explain the security issue
+2. Based on their analysis, formulate YOUR fix strategy
+3. Ask PatchAgent to implement your fix
+4. Ask VerificationAgent to run tests
+5. Iterate if needed
+
+You must account for **all** listed vulnerable locations (multiple hunks/files may be affected).
+
+Remember: YOU are the strategist. You decide what to do. Specialists help you research and execute.
+
+Begin!
+
+2026-01-16 19:45:30,610 - src.agents.base - DEBUG - CoordinatorAgent starting agent run (max_turns=1000000)
+2026-01-16 19:45:30,610 - src.agents.base - DEBUG - CoordinatorAgent - System prompt (3914 chars):
+You are a Security Patch Coordinator. You lead a team of specialists to fix security vulnerabilities.
+
+## Role
+
+You are both the **strategist** and **orchestrator**. You:
+1. Analyze vulnerabilities and formulate fix strategies
+2. Delegate research and implementation to specialists
+3. Learn from failures and iterate until successful
+
+## Specialists
+
+Use the **AskAgent** tool to consult specialists:
+
+### ContextKnowledgeAgent (Research)
+Ask them to:
+- Read and analyze code files
+- Explain code patterns and security flows
+- Provide CWE/CVE remediation guidance
+- Investigate test files and expected behaviors
+
+Example: "Read h11/_readers.py and explain how ChunkedReader handles line terminators"
+
+### PatchAgent (Implementation)
+Ask them to:
+- Apply specific code changes you've designed
+- They have EditCode tool access
+
+Example: "In _readers.py, modify the __call__ method to reject bare \n line terminators"
+
+### VerificationAgent (Testing)
+Ask them to:
+- Run PoC (proof of concept) tests to verify the vulnerability is fixed
+- Run regression tests to ensure nothing broke
+
+Example: "Run the PoC and regression tests to verify the patch"
+
+## Tools
+
+You also have direct access to:
+- **ReadFile**: Quick file reads (for simple checks)
+- **EditCode**: Apply changes directly (if you're confident)
+- **RunTest**: Run tests directly
+
+## Strategy
+
+When planning a fix, consider:
+
+1. **Minimal change** - Smallest diff that fixes the vulnerability
+2. **Preserve behavior** - Don't break existing functionality
+3. **Match conventions** - Follow the repo's existing patterns
+4. **Security completeness** - Block all attack vectors, not just the PoC
+
+## Workflow
+
+### Phase 1: Understand
+- Ask ContextKnowledgeAgent to analyze the vulnerable code
+- Understand what the code does and why it's vulnerable
+- Look at related tests to understand expected behavior
+
+### Phase 2: Strategize (YOU DO THIS - no Planner needed)
+- Formulate 1-2 fix approaches
+- Consider trade-offs
+- Choose the best approach
+- Be specific about what needs to change
+
+### Phase 3: Implement
+- Ask PatchAgent to apply your chosen fix
+- Be specific: which file, which function, what change
+
+### Phase 4: Verify
+- Ask VerificationAgent to run tests
+- If tests fail, analyze why and iterate
+
+### Phase 5: Iterate (if needed)
+- If the fix didn't work, DON'T just retry the same thing
+- Ask ContextKnowledgeAgent for more context
+- Revise your strategy based on what you learned
+- Try a different approach
+
+## Communication
+
+Have **natural conversations** with your specialists:
+
+GOOD: "I see the vulnerability is in extract(). Can you show me how 'name' flows through the function?"
+BAD: "Analyze constraint_sheet and produce knowledge_packet"
+
+GOOD: "The last patch failed because we didn't handle absolute paths. Let's add that check."
+BAD: "Generate strategy for iteration 2"
+
+## Output Format
+
+When you've successfully fixed the vulnerability (tests pass):
+```json
+{
+  "status": "success",
+  "vulnerability": "Brief description of what was wrong",
+  "fix": "Brief description of the fix applied",
+  "iterations": <number>
+}
+```
+
+If you've exhausted attempts without success:
+```json
+{
+  "status": "failed",
+  "vulnerability": "What we understood about the issue",
+  "attempts": ["Attempt 1: tried X, failed because Y", "Attempt 2: ..."],
+  "blocker": "Why we couldn't fix it"
+}
+```
+
+## Rules
+
+1. **YOU are the strategist** - Feel free to consult with specialists but you must make the final decisions
+2. **Specialists execute** - ContextAgent researches, PatchAgent implements, VerificationAgent tests
+3. **Learn from failures** - Each iteration should try something DIFFERENT
+4. **Be specific** - Vague instructions lead to vague results
+5. **Stay focused** - Only modify the vulnerable file(s), not the whole codebase
+6. **Workflow** - Follow the Understand -> Strategize -> Implement -> Verify -> Iterate process for the first patch at least
+
+2026-01-16 19:45:32,795 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 19:45:32,795 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "ContextKnowledgeAgent",
+  "message": "Please analyze mlflow/utils/uri.py, focusing on the validate_path_is_safe function. Explain how it currently attempts to prevent path traversal (CWE-22) and improper input validation (CWE-73), and identify any weaknesses or bypasses in its logic. Also, check if there are related functions or usages that could be relevant to the vulnerability."
+}
+2026-01-16 19:45:32,796 - src.agents.base - INFO - ContextKnowledgeAgent - LLM call prompt (1956 chars):
+## Message
+Please analyze mlflow/utils/uri.py, focusing on the validate_path_is_safe function. Explain how it currently attempts to prevent path traversal (CWE-22) and improper input validation (CWE-73), and identify any weaknesses or bypasses in its logic. Also, check if there are related functions or usages that could be relevant to the vulnerability.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2023-6831",
+  "file_path": "mlflow/utils/uri.py",
+  "vulnerable_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2023-6831",
+  "cwe_id": [
+    "CWE-73",
+    "CWE-22"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "mlflow/utils/uri.py",
+      "start_line": 422,
+      "end_line": 446
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null,
+  "repo_url": "https://github.com/mlflow/mlflow",
+  "work_dir": "",
+  "cwe_info": {},
+  "patch_description": "Path Traversal: '\\..\\filename' in GitHub repository mlflow/mlflow prior to 2.9.2."
+}
+```
+2026-01-16 19:45:32,828 - src.agents.base - DEBUG - ContextKnowledgeAgent starting agent run (max_turns=1000000)
+2026-01-16 19:45:32,828 - src.agents.base - DEBUG - ContextKnowledgeAgent - System prompt (2211 chars):
+You are a Repository Expert and Security Knowledge Analyst.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide a clear, actionable response.
+
+## Role
+
+You are the **go-to expert** for understanding this codebase in the context of the vulnerability. Your role is to:
+
+1. **Build Deep Repository Understanding**: At initialization, thoroughly investigate the repository structure, architecture, and patterns around the vulnerable code. You should become intimately familiar with:
+   - How the vulnerable code fits into the broader system
+   - Dependencies, imports, and relationships with other components
+   - Coding patterns, conventions, and architectural decisions used in this repository
+   - Test infrastructure and validation approaches
+   - Build system and deployment considerations
+
+2. **Provide Contextual Constraints**: Create a detailed Constraint Sheet that captures:
+   - What can and cannot be modified
+   - Dependencies that must be preserved
+   - API contracts and interfaces that must be maintained
+   - Side effects to be aware of
+   - Edge cases specific to this repository
+   - Remediation strategies appropriate for this codebase architecture
+   - Potential pitfalls based on repository patterns
+
+4. **Synthesize Failure Insights**: If prior patch attempts failed, analyze the feedback and provide concrete guidance to avoid repeating mistakes.
+
+**Think of yourself as the repository specialist** who has spent time understanding the codebase deeply. Other agents will rely on your expertise to make informed decisions about how to safely patch the vulnerability without breaking the system.
+
+## Tools
+- ReadFile: Read file contents
+- FindClass: Find definitions and usages of symbols
+- SymbolVerify: Verify symbol definitions and imports
+
+## Output Format
+Return a single JSON object:
+
+```json
+{
+  "constraint_sheet": { ... },
+  "knowledge_packet": { ... },
+  "failure_insights": {
+    "issues": ["summary of observed problems or risks"],
+    "suspected_cause": "likely root cause of previous failure (if any)",
+    "suggestions": ["concrete guidance to fix or avoid failures"]
+  }
+}
+```
+
+If no prior feedback is provided, set "failure_insights" to an empty object.
+
+2026-01-16 19:45:35,875 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:35,875 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_path_is_safe",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:36,327 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:36,327 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:36,327 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 1,
+  "end_line": 60
+}
+2026-01-16 19:45:36,441 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:36,442 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:36,442 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "validate_path_is_safe",
+  "search_type": "all",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:37,236 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:37,237 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:37,237 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_file_uri",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:37,755 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:37,756 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:37,756 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "local_file_uri_to_path",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:38,304 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:38,304 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:38,305 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "_OS_ALT_SEPS",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:38,827 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:38,828 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:38,828 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_windows",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:39,356 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:41,423 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:41,423 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 419,
+  "end_line": 446
+}
+2026-01-16 19:45:41,571 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:41,572 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:41,572 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 64,
+  "end_line": 90
+}
+2026-01-16 19:45:41,676 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:41,677 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:41,677 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/file_utils.py",
+  "start_line": 618,
+  "end_line": 638
+}
+2026-01-16 19:45:41,792 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:41,792 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:41,793 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/os.py",
+  "start_line": 1,
+  "end_line": 20
+}
+2026-01-16 19:45:41,898 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:43,328 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:43,328 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "MlflowException",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:43,957 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:43,958 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 19:45:43,958 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "INVALID_PARAMETER_VALUE",
+  "search_type": "definition",
+  "file_pattern": "*.py"
+}
+2026-01-16 19:45:44,478 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 19:45:45,858 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:45,859 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/exceptions.py",
+  "start_line": 64,
+  "end_line": 84
+}
+2026-01-16 19:45:46,003 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:46,004 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:46,004 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/protos/databricks_pb2.py",
+  "start_line": 40,
+  "end_line": 45
+}
+2026-01-16 19:45:46,117 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:47,706 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:47,706 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/store/artifact/http_artifact_repo.py",
+  "start_line": 80,
+  "end_line": 100
+}
+2026-01-16 19:45:47,848 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:47,849 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:47,849 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 540,
+  "end_line": 570
+}
+2026-01-16 19:45:47,950 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:49,426 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:49,426 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 520,
+  "end_line": 570
+}
+2026-01-16 19:45:49,578 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:49,579 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:49,579 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/tracking/test_rest_tracking.py",
+  "start_line": 650,
+  "end_line": 670
+}
+2026-01-16 19:45:49,698 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:50,825 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:50,825 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 930,
+  "end_line": 950
+}
+2026-01-16 19:45:50,958 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:45:51,999 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 19:45:52,000 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/server/handlers.py",
+  "start_line": 1200,
+  "end_line": 1250
+}
+2026-01-16 19:45:52,144 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:46:06,872 - src.agents.base - INFO - ContextKnowledgeAgent - LLM response (3720 chars):
+```json
+{
+  "constraint_sheet": {
+    "modifiable_scope": [
+      "validate_path_is_safe function in mlflow/utils/uri.py",
+      "Related path validation logic in mlflow.utils.uri, mlflow.utils.file_utils, and mlflow.utils.os"
+    ],
+    "non_modifiable_scope": [
+      "API contracts: validate_path_is_safe must continue to raise MlflowException with INVALID_PARAMETER_VALUE for invalid paths",
+      "External interface: Path validation must not break legitimate artifact or file operations",
+      "Error codes and exception types must remain consistent for client compatibility"
+    ],
+    "dependencies": [
+      "local_file_uri_to_path (mlflow.utils.file_utils)",
+      "is_file_uri (mlflow.utils.uri)",
+      "is_windows (mlflow.utils.os)",
+      "_OS_ALT_SEPS (mlflow.utils.uri)",
+      "MlflowException (mlflow.exceptions)",
+      "INVALID_PARAMETER_VALUE (mlflow.protos.databricks_pb2)"
+    ],
+    "api_contracts": [
+      "validate_path_is_safe(path) raises MlflowException for invalid paths",
+      "Path validation is called in artifact upload, download, and listing handlers"
+    ],
+    "side_effects": [
+      "Rejecting valid paths could break artifact upload/download for legitimate users",
+      "Overly permissive validation could allow path traversal or improper file access"
+    ],
+    "edge_cases": [
+      "Windows UNC paths, drive letters, and alternate separators",
+      "Encoded path traversal (e.g., %2e%2e for .., double encoding)",
+      "Null byte injection (e.g., /etc/passwd%00.jpg)",
+      "Mixed or repeated separators (e.g., //, \\, /../, ..\\)",
+      "Absolute paths in both Windows and POSIX style"
+    ],
+    "remediation_strategies": [
+      "Normalize and decode input paths before validation",
+      "Explicitly reject any path containing '..' after normalization",
+      "Reject absolute paths and paths with alternate separators",
+      "Consider double-encoding and unicode normalization attacks"
+    ],
+    "potential_pitfalls": [
+      "Relying solely on string checks without normalization/decoding",
+      "Not accounting for all OS-specific path quirks",
+      "Missing encoded or obfuscated traversal attempts"
+    ]
+  },
+  "knowledge_packet": {
+    "function_purpose": "validate_path_is_safe is designed to prevent path traversal (CWE-22) and improper input validation (CWE-73) by rejecting paths that are absolute, contain '..', or use alternate OS-specific separators.",
+    "current_logic": [
+      "Rejects paths containing '#' or '%23' (fragment/encoded fragment)",
+      "If path is a file URI, converts to local path",
+      "Rejects if path contains any alternate OS separator (other than '/')",
+      "Rejects if any path segment is '..'",
+      "Rejects if path is absolute (Windows or POSIX style)",
+      "Rejects if on Windows and path[1] == ':' (drive letter)"
+    ],
+    "weaknesses": [
+      "Does not decode percent-encoded sequences before validation (e.g., %2e%2e for .., %2f for /)",
+      "Does not normalize path (e.g., collapsing multiple slashes, resolving './' or '../') before checks",
+      "May not handle double-encoding or unicode-encoded traversal attempts",
+      "Relies on split('/') for '..' detection, which can be bypassed with alternate separators or encoding",
+      "May not catch all Windows-specific traversal tricks (e.g., mixed separators, UNC paths with traversal)"
+    ],
+    "relevant_usages": [
+      "Artifact upload, download, and listing handlers in mlflow/server/handlers.py",
+      "Artifact listing in mlflow/store/artifact/http_artifact_repo.py",
+      "Test coverage in tests/tracking/test_rest_tracking.py for both good and bad paths, including Windows-specific cases"
+    ]
+  },
+  "failure_insights": {}
+}
+```
+2026-01-16 19:46:06,873 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 19:46:21,980 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 19:46:21,980 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "PatchAgent",
+  "message": "In mlflow/utils/uri.py, update the validate_path_is_safe function as follows:\n\n1. Before any checks, decode percent-encoded sequences in the path using urllib.parse.unquote, repeatedly until the path no longer changes (to catch double-encoding).\n2. After decoding, normalize the path using pathlib.PurePosixPath (or PureWindowsPath on Windows) to collapse redundant separators and resolve '..' and '.' segments.\n3. Apply the existing checks (absolute path, '..' in segments, alternate separators, etc.) to the decoded, normalized path.\n4. Ensure the function still raises MlflowException with INVALID_PARAMETER_VALUE for invalid paths.\n\nThis will block encoded and obfuscated traversal attempts. Only modify this function; do not change its signature or error handling."
+}
+2026-01-16 19:46:21,982 - src.agents.base - INFO - PatchAgent - LLM call prompt (2185 chars):
+## Message
+In mlflow/utils/uri.py, update the validate_path_is_safe function as follows:
+
+1. Before any checks, decode percent-encoded sequences in the path using urllib.parse.unquote, repeatedly until the path no longer changes (to catch double-encoding).
+2. After decoding, normalize the path using pathlib.PurePosixPath (or PureWindowsPath on Windows) to collapse redundant separators and resolve '..' and '.' segments.
+3. Apply the existing checks (absolute path, '..' in segments, alternate separators, etc.) to the decoded, normalized path.
+4. Ensure the function still raises MlflowException with INVALID_PARAMETER_VALUE for invalid paths.
+
+This will block encoded and obfuscated traversal attempts. Only modify this function; do not change its signature or error handling.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2023-6831",
+  "file_path": "mlflow/utils/uri.py",
+  "vulnerable_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2023-6831",
+  "cwe_id": [
+    "CWE-73",
+    "CWE-22"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "mlflow/utils/uri.py",
+      "start_line": 422,
+      "end_line": 446
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 19:46:22,017 - src.agents.base - DEBUG - PatchAgent starting agent run (max_turns=1000000)
+2026-01-16 19:46:22,017 - src.agents.base - DEBUG - PatchAgent - System prompt (1430 chars):
+You are a Security Patch Developer responsible for implementing vulnerability fixes.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear, concise feedback about the implementation.
+
+## Role
+You receive high-level guidance describing WHAT to fix, not HOW. You must implement the fix with correct, complete code.
+
+## Rules
+
+1. **ONLY edit the vulnerable file(s)**: You may ONLY modify files explicitly listed in the vulnerability location. Do NOT edit any other files.
+2. **Complete Code Only**: Every variable, function, regex pattern, or constant you reference MUST be defined
+3. **No Placeholders**: Never use placeholder names like `enhanced_pattern`, `new_validator`, `helper_function` without implementing them
+4. **No Undefined References**: If you add `foo(x)`, the function `foo` must exist or you must define it
+5. **Verify Before Edit**: After reading the file, mentally trace your new code to ensure all symbols resolve
+6. **Rigor**: Be thorough, defensive and rigorous in your implementation. If you spot any issues the planner did not account for, fix them and report back in your patch summary.
+
+## Guidelines
+- Minimal changes only; preserve behavior.
+- Use ReadFile before EditCode.
+- Ensure every referenced symbol is defined.
+
+## Output Format
+Return a JSON summary with patch_applied and a short change description.
+Be precise and careful. Incorrect patches waste verification cycles.
+2026-01-16 19:46:23,696 - src.agents.base - INFO - PatchAgent executing tool: ReadFile
+2026-01-16 19:46:23,696 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 422,
+  "end_line": 446
+}
+2026-01-16 19:46:23,854 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:46:24,959 - src.agents.base - INFO - PatchAgent executing tool: ReadFile
+2026-01-16 19:46:24,959 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 1,
+  "end_line": 20
+}
+2026-01-16 19:46:25,106 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:46:26,212 - src.agents.base - INFO - PatchAgent executing tool: ReadFile
+2026-01-16 19:46:26,212 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 21,
+  "end_line": 60
+}
+2026-01-16 19:46:26,378 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:46:27,239 - src.agents.base - INFO - PatchAgent executing tool: ReadFile
+2026-01-16 19:46:27,239 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "start_line": 61,
+  "end_line": 100
+}
+2026-01-16 19:46:27,400 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 19:46:34,918 - src.agents.base - INFO - PatchAgent executing tool: EditCode
+2026-01-16 19:46:34,918 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "old_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "new_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n\n    # Step 1: Repeatedly decode percent-encoded sequences\n    prev_path = None\n    decoded_path = path\n    while prev_path != decoded_path:\n        prev_path = decoded_path\n        decoded_path = urllib.parse.unquote(decoded_path)\n\n    # Step 2: Normalize the path using pathlib\n    if is_windows():\n        normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n        path_obj = pathlib.PureWindowsPath(decoded_path)\n    else:\n        normalized_path = str(pathlib.PurePosixPath(decoded_path))\n        path_obj = pathlib.PurePosixPath(decoded_path)\n\n    # Step 3: Apply the existing checks to the decoded, normalized path\n    if any((s in normalized_path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        normalized_path = local_file_uri_to_path(path)\n        # Re-apply decoding and normalization to the resolved file path\n        prev_path = None\n        decoded_path = normalized_path\n        while prev_path != decoded_path:\n            prev_path = decoded_path\n            decoded_path = urllib.parse.unquote(decoded_path)\n        if is_windows():\n            normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n            path_obj = pathlib.PureWindowsPath(decoded_path)\n        else:\n            normalized_path = str(pathlib.PurePosixPath(decoded_path))\n            path_obj = pathlib.PurePosixPath(decoded_path)\n\n    if (\n        any((s in normalized_path) for s in _OS_ALT_SEPS)\n        or \"..\" in list(path_obj.parts)\n        or path_obj.is_absolute()\n        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == \":\")\n    ):\n        raise exc\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 19:46:35,077 - src.tools.edit_code - INFO - EditCodeTool: Writing 18017 chars to mlflow/utils/uri.py (match_type=exact)
+2026-01-16 19:46:35,210 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 19:46:37,242 - src.agents.base - INFO - PatchAgent - LLM response (637 chars):
+{
+  "patch_applied": true,
+  "change_description": "The validate_path_is_safe function now repeatedly decodes percent-encoded sequences in the path using urllib.parse.unquote until the path no longer changes, to catch double-encoding. After decoding, the path is normalized using pathlib.PurePosixPath or PureWindowsPath (depending on OS) to collapse redundant separators and resolve '..' and '.' segments. All existing security checks are then applied to the decoded, normalized path, and the function still raises MlflowException with INVALID_PARAMETER_VALUE for invalid paths. This blocks encoded and obfuscated traversal attempts."
+}
+2026-01-16 19:46:37,243 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 19:46:39,396 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 19:46:39,397 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "VerificationAgent",
+  "message": "Run the PoC and regression tests to verify that the updated validate_path_is_safe in mlflow/utils/uri.py blocks path traversal (including encoded and obfuscated attempts) and does not break legitimate artifact/file operations."
+}
+2026-01-16 19:46:39,397 - src.agents.base - INFO - VerificationAgent - LLM call prompt (1642 chars):
+## Message
+Run the PoC and regression tests to verify that the updated validate_path_is_safe in mlflow/utils/uri.py blocks path traversal (including encoded and obfuscated attempts) and does not break legitimate artifact/file operations.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2023-6831",
+  "file_path": "mlflow/utils/uri.py",
+  "vulnerable_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2023-6831",
+  "cwe_id": [
+    "CWE-73",
+    "CWE-22"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "mlflow/utils/uri.py",
+      "start_line": 422,
+      "end_line": 446
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 19:46:39,433 - src.agents.base - DEBUG - VerificationAgent starting agent run (max_turns=1000000)
+2026-01-16 19:46:39,433 - src.agents.base - DEBUG - VerificationAgent - System prompt (3831 chars):
+You are a Security Verification Engineer responsible for validating vulnerability patches.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear test results and feedback.
+
+## Role
+
+After a patch is applied, you verify it using PatchEval's validation scripts:
+1. Run the PoC (Proof of Concept) test to verify the vulnerability is fixed
+2. Run the unit test suite (if present) to verify no regressions were introduced
+3. Produce structured feedback for the Planner if the patch fails
+
+## Tools
+
+### RunTest
+Runs PatchEval validation scripts in sequence:
+1. **prepare.sh** - Resets the repository to a clean state
+2. **fix-run.sh** - Executes the PoC to verify the vulnerability is patched
+3. **unit_test.sh** - (if present) Runs unit tests for functional correctness
+
+Parameters:
+- `run_prepare`: Whether to run prepare.sh first (default: true)
+- `timeout`: Timeout in seconds for each script (default: 120)
+ - `include_paths`: Optional list of file paths to limit the diff used to build /workspace/fix.patch. Pass the files you edited (e.g., from EditCode).
+
+The tool automatically:
+- Extracts the git diff from your applied changes
+- Writes it to /workspace/fix.patch
+- Runs the validation scripts
+- Returns the raw stdout/stderr output
+
+## Test Output Rules
+
+**YOU must read the stdout/stderr output to determine if tests pass or fail.**
+
+The RunTest tool returns raw output - it does NOT tell you if tests passed. You must analyze:
+
+### For PoC (fix-run.sh):
+- **PASS indicators**: "test passed", "vulnerability fixed", "OK", exit code 0 with no errors
+- **FAIL indicators**: tracebacks, exceptions, "FAILED", "AssertionError", "vulnerability still present"
+
+### For Unit Tests (unit_test.sh):
+- **PASS indicators**: "OK", "passed", "0 failures", all tests green
+- **FAIL indicators**: "FAILED", "ERROR", assertion failures, exceptions, non-zero failure count
+
+### Exit Codes:
+- Exit code 0 usually means success, but ALWAYS verify by reading the actual output
+- Exit code non-zero usually means failure, but check the output for details
+
+## Workflow
+
+1. **Call RunTest**: Simply call the RunTest tool - it handles setup automatically
+2. **READ THE OUTPUT CAREFULLY**: The tool returns raw stdout/stderr - analyze it to determine:
+   - Did the PoC test pass? (vulnerability fixed?)
+   - Did unit tests pass? (no regressions?)
+3. **Provide Feedback**: Based on YOUR analysis of the output, provide actionable feedback
+ 4. When calling RunTest, if `edited_files` are provided in context, pass them via `include_paths` to restrict the patch to only those files.
+
+## Output Format
+
+After running the test and READING THE OUTPUT, provide your analysis:
+
+```json
+{
+    "poc_result": {
+        "passed": true/false, true if and only if the test conclusively shows the vulnerability is fixed
+        "vulnerability_fixed": true/false,
+        "analysis": "What you observed in the fix-run.sh output that led to this conclusion"
+    },
+    "regression_result": {
+        "passed": true/false, true if and only if all unit tests passed
+        "tests_present": true/false,
+        "analysis": "What you observed in the unit_test.sh output (if present)"
+    },
+    "overall_verdict": "PASS" | "FAIL_POC" | "FAIL_REGRESSION",
+    "feedback_for_planner": {
+        "issues": ["List of specific issues from the test output"],
+        "suggestions": ["Concrete suggestions for fixing the issues"],
+        "suspected_cause": "Analysis of the root cause of failures",
+        "output_excerpt": "Relevant portion of test output showing the failure"
+    }
+}
+```
+
+Be thorough in your analysis. Quote specific lines from the output to support your conclusions. If a test fails, you must mark it as such, there is no room for interpretation in that case. If either poc or unit tests are missing, you may mark them as passed
+2026-01-16 19:46:40,395 - src.agents.base - INFO - VerificationAgent executing tool: RunTest
+2026-01-16 19:46:40,395 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "mlflow/utils/uri.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 19:46:40,740 - src.tools.run_test - INFO - Extracted 4 file paths from /workspace/test.patch: ['tests/utils/test_uri.py', 'tests/tracking/test_rest_tracking.py', 'tests/server/test_handlers.py', 'tests/store/artifact/test_http_artifact_repo.py']
+2026-01-16 19:46:40,741 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 19:46:40,741 - src.tools.run_test - INFO -   include_paths: ['mlflow/utils/uri.py']
+2026-01-16 19:46:40,741 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/utils/test_uri.py', 'tests/tracking/test_rest_tracking.py', 'tests/server/test_handlers.py', 'tests/store/artifact/test_http_artifact_repo.py']
+2026-01-16 19:46:40,741 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/utils/uri.py' ':(exclude)tests/utils/test_uri.py' ':(exclude)tests/tracking/test_rest_tracking.py' ':(exclude)tests/server/test_handlers.py' ':(exclude)tests/store/artifact/test_http_artifact_repo.py'
+2026-01-16 19:46:40,889 - src.tools.run_test - INFO -   Generated patch: 2364 bytes, 58 lines
+2026-01-16 19:46:40,890 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/utils/uri.py b/mlflow/utils/uri.py
+index 331648b..d7fa7a9 100644
+--- a/mlflow/utils/uri.py
++++ b/mlflow/utils/uri.py
+@@ -431,16 +431,46 @@ def validate_path_is_safe(path):
+     from mlflow.utils.file_utils import local_file_uri_to_path
+ 
+     exc = MlflowException(f"Invalid path: {path}", error_code=INVALID_PARAMETER_VALUE)
+-    if any((s in path) for s in ("#", "%23")):
++
++    # Step 1: Repeatedly decode percent-encoded sequences
++    prev_path = None
++    decoded_path = path
++    while prev_path != decoded_path:
++        prev_path = decoded_path
++        decoded_path = urllib.parse.unquote(decoded_path)
++
++    # Step 2: Normalize the path using pathlib
++    if is_windows():
++        normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++        path_obj = pathlib.PureWindowsPath(decoded_path)
++    else:
++        normalized_path = str(pathlib.PurePosixPath(decoded_path))
++        path_obj = pathlib.PurePosixPath(decoded_path)
++
++    # Step 3: Apply the existing checks to the decoded, normalized path
++    if any((s in normalized_path) for s in ("#", "%23")):
+         raise exc
+ 
+     if is_file_uri(path):
+-        path = local_file_uri_to_path(path)
++        normalized_path = local_file_uri_to_path(path)
++        # Re-apply decoding and normalization to the resolved file path
++        prev_path = None
++        decoded_path = normalized_path
++        while prev_path != decoded_path:
++            prev_path = decoded_path
++            decoded_path = urllib.parse.unquote(decoded_path)
++        if is_windows():
++            normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++            path_obj = pathlib.PureWindowsPath(decoded_path)
++        else:
++            normalized_path = str(pathlib.PurePosixPath(decoded_path))
++            path_obj = pathlib.PurePosixPath(decoded_path)
++
+     if (
+-        any((s in path) for s in _OS_ALT_SEPS)
+-        or ".." in path.split("/")
+-        or pathlib.PureWindowsPath(path).is_absolute()
+-        or pathlib.PurePosixPath(path).is_absolute()
+-        or (is_windows() and len(path) >= 2 and path[1] == ":")
++        any((s in normalized_path) for s in _OS_ALT_SEPS)
++        or ".." in list(path_obj.parts)
++        or path_obj.is_absolute()
++        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == ":")
+     ):
+         raise exc
++
+
+2026-01-16 19:46:40,971 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 19:46:43,334 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 19:46:43,471 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/utils/uri.py b/mlflow/utils/uri.py
+index 331648b..d7fa7a9 100644
+--- a/mlflow/utils/uri.py
++++ b/mlflow/utils/uri.py
+@@ -431,16 +431,46 @@ def validate_path_is_safe(path):
+     from mlflow.utils.file_utils import local_file_uri_to_path
+ 
+     exc = MlflowException(f"Invalid path: {path}", error_code=INVALID_PARAMETER_VALUE)
+-    if any((s in path) for s in ("#", "%23")):
++
++    # Step 1: Repeatedly decode percent-encoded sequences
++    prev_path = None
++    decoded_path = path
++    while prev_path != decoded_path:
++        prev_path = decoded_path
++        decoded_path = urllib.parse.unquote(decoded_path)
++
++    # Step 2: Normalize the path using pathlib
++    if is_windows():
++        normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++        path_obj = pathlib.PureWindowsPath(decoded_path)
++    else:
++        normalized_path = str(pathlib.PurePosixPath(decoded_path))
++        path_obj = pathlib.PurePosixPath(decoded_path)
++
++    # Step 3: Apply the existing checks to the decoded, normalized path
++    if any((s in normalized_path) for s in ("#", "%23")):
+         raise exc
+ 
+     if is_file_uri(path):
+-        path = local_file_uri_to_path(path)
++        normalized_path = local_file_uri_to_path(path)
++        # Re-apply decoding and normalization to the resolved file path
++        prev_path = None
++        decoded_path = normalized_path
++        while prev_path != decoded_path:
++            prev_path = decoded_path
++            decoded_path = urllib.parse.unquote(decoded_path)
++        if is_windows():
++            normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++            path_obj = pathlib.PureWindowsPath(decoded_path)
++        else:
++            normalized_path = str(pathlib.PurePosixPath(decoded_path))
++            path_obj = pathlib.PurePosixPath(decoded_path)
++
+     if (
+-        any((s in path) for s in _OS_ALT_SEPS)
+-        or ".." in path.split("/")
+-        or pathlib.PureWindowsPath(path).is_absolute()
+-        or pathlib.PurePosixPath(path).is_absolute()
+-        or (is_windows() and len(path) >= 2 and path[1] == ":")
++        any((s in normalized_path) for s in _OS_ALT_SEPS)
++        or ".." in list(path_obj.parts)
++        or path_obj.is_absolute()
++        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == ":")
+     ):
+         raise exc
++
+
+
+2026-01-16 19:46:47,275 - src.tools.run_test - INFO - fix-run.sh completed with exit code 1
+2026-01-16 19:46:47,276 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2023-6831/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 26 items
+
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [  3%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [  7%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 11%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 15%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 19%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[/tmp/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 26%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[../../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 30%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 34%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 38%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 42%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[../../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 46%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[./../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 50%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[path/../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 53%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[path/../../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 57%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[file://a#/..//tmp] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 61%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[file://a%23/..//tmp/] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 65%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 69%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.jpg] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 73%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.html] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 76%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.txt] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 80%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.php] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 84%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.asp] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 88%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/file://etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 92%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [ 96%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[31m [100%][0m
+
+=================================== FAILURES ===================================
+[31m[1m____ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] ____[0m
+
+enable_serve_artifacts = None, path = '/path'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path: /path' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: /path[0m
+[1m[31mE         ?             +++++++[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: /path'}
+path       = '/path'
+response   = <Response 75 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+[31m[1m_ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] _[0m
+
+enable_serve_artifacts = None, path = 'path/../to/file'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path...th/../to/file' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: path/../to/file[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: path/../to/file'}
+path       = 'path/../to/file'
+response   = <Response 85 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+[31m[1m_ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] _[0m
+
+enable_serve_artifacts = None, path = '/etc/passwd'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path: /etc/passwd' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: /etc/passwd[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: /etc/passwd'}
+path       = '/etc/passwd'
+response   = <Response 81 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+[31m[1m_ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] _[0m
+
+enable_serve_artifacts = None, path = '/etc/passwd%00.jpg'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path...passwd%00.jpg' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: /etc/passwd%00.jpg[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: /etc/passwd%00.jpg'}
+path       = '/etc/passwd%00.jpg'
+response   = <Response 88 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+[31m[1m_ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] _[0m
+
+enable_serve_artifacts = None, path = '/file://etc/passwd'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path...://etc/passwd' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: /file://etc/passwd[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: /file://etc/passwd'}
+path       = '/file://etc/passwd'
+response   = <Response 88 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+[31m[1m_ test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] _[0m
+
+enable_serve_artifacts = None, path = '%2E%2E%2F%2E%2E%2Fpath'
+
+    [0m[37m@pytest[39;49;00m.mark.parametrize([90m[39;49;00m
+        [33m"[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        [[90m[39;49;00m
+            [33m"[39;49;00m[33m/path[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33mpath/../to/file[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/etc/passwd[39;49;00m[33m%[39;49;00m[33m00.jpg[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m/file://etc/passwd[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+            [33m"[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33m%2E[39;49;00m[33m%2E[39;49;00m[33m%2F[39;49;00m[33mpath[39;49;00m[33m"[39;49;00m,[90m[39;49;00m
+        ],[90m[39;49;00m
+    )[90m[39;49;00m
+    [94mdef[39;49;00m[90m [39;49;00m[92mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[39;49;00m(enable_serve_artifacts, path):[90m[39;49;00m
+        response = _delete_artifact_mlflow_artifacts(path)[90m[39;49;00m
+        [94massert[39;49;00m response.status_code == [94m400[39;49;00m[90m[39;49;00m
+        json_response = json.loads(response.get_data())[90m[39;49;00m
+        [94massert[39;49;00m json_response[[33m"[39;49;00m[33merror_code[39;49;00m[33m"[39;49;00m] == ErrorCode.Name(INVALID_PARAMETER_VALUE)[90m[39;49;00m
+>       [94massert[39;49;00m json_response[[33m"[39;49;00m[33mmessage[39;49;00m[33m"[39;49;00m] == [33m"[39;49;00m[33mInvalid path[39;49;00m[33m"[39;49;00m[90m[39;49;00m
+[1m[31mE       AssertionError: assert 'Invalid path...%2E%2E%2Fpath' == 'Invalid path'[0m
+[1m[31mE         [0m
+[1m[31mE         - Invalid path[0m
+[1m[31mE         + Invalid path: %2E%2E%2F%2E%2E%2Fpath[0m
+
+enable_serve_artifacts = None
+json_response = {'error_code': 'INVALID_PARAMETER_VALUE', 'message': 'Invalid path: %2E%2E%2F%2E%2E%2Fpath'}
+path       = '%2E%2E%2F%2E%2E%2Fpath'
+response   = <Response 92 bytes [400 BAD REQUEST]>
+
+[1m[31mtests/server/test_handlers.py[0m:804: AssertionError
+============================= slowest 10 durations =============================
+0.01s setup    tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path]
+
+(9 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= command to run failed test cases =======================
+pytest 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path]' 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file]' 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd]' 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg]' 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd]' 'tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath]'
+
+[36m[1m=========================== short test summary info ============================[0m
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path][0m - AssertionError: assert 'Invalid path: /path' == 'Invalid path'
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file][0m - AssertionError: assert 'Invalid path...th/../to/file' == 'Invalid path'
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd][0m - AssertionError: assert 'Invalid path: /etc/passwd' == 'Invalid path'
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg][0m - AssertionError: assert 'Invalid path...passwd%00.jpg' == 'Invalid path'
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd][0m - AssertionError: assert 'Invalid path...://etc/passwd' == 'Invalid path'
+[31mFAILED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m tests/server/test_handlers.py::[1mtest_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath][0m - AssertionError: assert 'Invalid path...%2E%2E%2Fpath' == 'Invalid path'
+[31m================== [31m[1m6 failed[0m, [32m20 passed[0m, [33m14 warnings[0m[31m in 0.53s[0m[31m ===================[0m
+
+2026-01-16 19:46:47,396 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 19:46:48,049 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 19:47:02,606 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 19:47:02,607 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2023-6831/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 236 items / 3 deselected / 233 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  0%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  0%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  1%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  1%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  5%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  5%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  8%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  8%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 10%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 10%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 11%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 11%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 13%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 13%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_artifact_uri_factory[http] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_artifact_uri_factory[https] [32mPASSED | MEM 0.7/3.8 GB | DISK 75.9/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.txt-text/plain] [32mPASSED | MEM 0.8/3.8 GB | DISK 76.4/1006.9 GB[0m[33m [ 16%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.pkl-application/octet-stream] [32mPASSED | MEM 0.9/3.8 GB | DISK 76.9/1006.9 GB[0m[33m [ 16%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-MLmodel-text/plain] [32mPASSED | MEM 0.8/3.8 GB | DISK 77.4/1006.9 GB[0m[33m [ 17%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.txt-text/plain] [32mPASSED | MEM 0.9/3.8 GB | DISK 77.9/1006.9 GB[0m[33m [ 17%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.pkl-application/octet-stream] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.4/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-MLmodel-text/plain] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifacts[None] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifacts[dir] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 19%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 19%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_file[a.txt] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 20%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_file[dir/b.xtx] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 20%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_artifacts [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_default_host_creds [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[a.txt] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[dir/b.txt] [32mPASSED | MEM 1.0/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 22%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[None] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 22%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_create_multipart_upload [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_complete_multipart_upload [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_abort_multipart_upload [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_extract_db_type_from_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB-result0] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB/-result1] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 25%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB/path-result2] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 25%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile:prefix-result3] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 26%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile:prefix/extra-result4] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 26%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[nondatabricks://profile:prefix-result5] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile-result6] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile/-result7] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile:prefix-result8] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 28%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile:prefix/extra-result9] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 28%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile-result10] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 29%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile/-result11] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 29%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks:/profile:prefix] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks:/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks://] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix:extra] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 31%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix:extra  ] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 31%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix extra] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 32%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix  ] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 32%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile ] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile: ] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_is_local_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 34%][0m
+tests/utils/test_uri.py::test_is_local_uri_windows [33mSKIPPED[0m (Windows-...)[33m [ 34%][0m
+tests/utils/test_uri.py::test_is_databricks_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 35%][0m
+tests/utils/test_uri.py::test_is_http_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 35%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_joins_uri_paths_and_posixpaths_correctly [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_handles_special_uri_characters_in_posixpaths [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params0-https://example.com?key=value] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com-existing_key=existing_value-query_params1-https://example.com?existing_key=existing_value&new_key=new_value] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 37%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params2-https://example.com?key1=value1&key2=value2&key3=value3] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 37%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params3-https://example.com?key=value+with+spaces&key2=special%23characters] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 38%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[--query_params4-?key=value] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 38%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params5-https://example.com] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params6-https://example.com?key1=123&key2=456] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com?existing_key=existing_value--query_params7-https://example.com?existing_key=existing_value&existing_key=new_value&existing_key=new_value_2] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[s3://bucket/key-prev1=foo&prev2=bar-query_params8-s3://bucket/key?prev1=foo&prev2=bar&param1=value1&param2=value2] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 40%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[s3://bucket/key?existing_param=existing_value--query_params9-s3://bucket/key?existing_param=existing_value&new_param=new_value] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 40%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_preserves_uri_schemes_hosts_queries_and_fragments [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 41%][0m
+tests/utils/test_uri.py::test_extract_and_normalize_path [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 41%][0m
+tests/utils/test_uri.py::test_is_databricks_acled_artifacts_uri [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[ftp://user:pass@realhost:port/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs:/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 43%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://incorrect:netloc:format/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 43%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 44%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks/-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 44%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks:port/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks:port/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 46%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks/path/to/nowhere-databricks://profile-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 46%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks:port/path/to/nowhere-databricks://profile-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 47%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 47%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks:port/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[runs://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[models://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[s3://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 49%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[ftp://user:pass@realhost:port/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 49%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs:/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 50%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 50%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://incorrect:netloc:format/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc/-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 52%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc:port/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 52%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks-uc/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 53%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks-uc:port/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 53%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks-uc/path/to/nowhere-databricks-uc://profile-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks-uc:port/path/to/nowhere-databricks-uc://profile-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks-uc:port/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 55%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[runs://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 55%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[models://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 56%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[s3://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 56%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://incorrect:netloc:format@databricks/path/a] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://scope::key_prefix@databricks/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://scope:key_prefix:@databricks/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[ftp://user:pass@realhost:port/path/nowhere-ftp://user:pass@realhost:port/path/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 58%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs:/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 58%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-dbfs://nondatabricks/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 59%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://incorrect:netloc:format/path/-dbfs://incorrect:netloc:format/path/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 59%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks-dbfs:] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks/-dbfs:/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 61%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 61%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://@databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 62%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://profile@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 62%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://profile@databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://scope:key_prefix@databricks/path/abc-dbfs:/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://scope:key_prefix@databricks:port/path/abc-dbfs:/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://incorrect:netloc:format@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 64%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[runs://scope:key_prefix@databricks/path/abc-runs:/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 64%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[models://scope:key_prefix@databricks/path/abc-models:/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 65%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[s3://scope:key_prefix@databricks/path/abc-s3:/path/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 65%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b-databricks-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks-dbfs://databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://Profile-dbfs://Profile@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://profile/-dbfs://profile@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 67%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://scope:key-dbfs://scope:key@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 67%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://scope:key/random_stuff-dbfs://scope:key@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 68%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-nondatabricks://profile-dbfs:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 68%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[runs:/path/a/b/-databricks://Profile-runs://Profile@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[runs:/path/a/b/-nondatabricks://profile-runs:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[models:/path/a/b/-databricks://profile-models://profile@databricks/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[models:/path/a/b/-nondatabricks://Profile-models:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 70%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[s3:/path/a/b/-databricks://Profile-s3:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 70%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[s3:/path/a/b/-nondatabricks://profile-s3:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 71%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp:/path/a/b/-databricks://profile-ftp:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 71%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp:/path/a/b/-nondatabricks://Profile-ftp:/path/a/b/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp://user:pass@host:port/a/b-databricks://Profile-ftp://user:pass@host:port/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp://user:pass@host:port/a/b-nothing://Profile-ftp://user:pass@host:port/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks-databricks://OtherProfile-dbfs://databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 73%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks-nondatabricks://Profile-dbfs://databricks] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 73%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks/path/a/b-databricks://OtherProfile-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 74%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks/path/a/b-nondatabricks://Profile-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 74%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://@databricks/path/a/b-databricks://OtherProfile-dbfs://@databricks/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://@databricks/path/a/b-nondatabricks://Profile-dbfs://@databricks/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/pp-databricks://OtherProfile-dbfs://profile@databricks/pp] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/path-databricks://profile-dbfs://profile@databricks/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 76%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/path-nondatabricks://Profile-dbfs://profile@databricks/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 76%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b-databricks://not:legit:auth] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 77%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope::key] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 77%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope:key:/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope:key ] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs:/path/a/b-True] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://databricks/a/b-True] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 79%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://@databricks/a/b-True] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 79%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://profile@databricks/a/b-True] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 80%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key@databricks/a/b-True] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 80%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key:@databricks/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope::key@databricks/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://profile@notdatabricks/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key@notdatabricks/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 82%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 82%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://notdatabricks/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 83%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[s3:/path/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 83%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[ftp://user:pass@host:port/path/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[ftp://user:pass@databricks/path/a/b-False] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[/tmp/path-/dbfs/tmp/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/path-/dbfs/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 85%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/path/a/b-/dbfs/path/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 85%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/dbfs/123/abc-/dbfs/dbfs/123/abc] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 86%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[some/relative/local/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 86%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[s3:/some/s3/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[C:/cool/windows/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[my/path-{cwd}/my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[#my/path?a=b-{cwd}/#my/path?a=b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 88%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file://myhostname/my/path-file://myhostname/my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 88%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file:///my/path-file:///{drive}my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 89%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file:my/path-file://{cwd}/my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 89%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[/home/my/path-/home/my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[dbfs://databricks/a/b-dbfs://databricks/a/b] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[s3://host/my/path-s3://host/my/path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[my/path-file://{cwd}/my/path] [33mSKIPPED[0m[33m [ 91%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[#my/path?a=b-file://{cwd}/#my/path?a=b] [33mSKIPPED[0m[33m [ 91%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file://myhostname/my/path-file://myhostname/my/path] [33mSKIPPED[0m[33m [ 92%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file:///my/path-file:///{drive}my/path] [33mSKIPPED[0m[33m [ 92%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file:my/path-file://{cwd}/my/path] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[/home/my/path-file:///{drive}home/my/path] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[dbfs://databricks/a/b-dbfs://databricks/a/b] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[s3://host/my/path-s3://host/my/path] [33mSKIPPED[0m[33m [ 94%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/dbfs/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 94%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[dbfs:/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 95%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/Volumes/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 95%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/.fuse-mounts/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[//dbfs////my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[///Volumes/] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[dbfs://my///path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 97%][0m
+tests/utils/test_uri.py::test_negative_detection[/My_Volumes/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 97%][0m
+tests/utils/test_uri.py::test_negative_detection[s3a:/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 98%][0m
+tests/utils/test_uri.py::test_negative_detection[Volumes/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 98%][0m
+tests/utils/test_uri.py::test_negative_detection[Volume:/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 99%][0m
+tests/utils/test_uri.py::test_negative_detection[dbfs/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 99%][0m
+tests/utils/test_uri.py::test_negative_detection[/fuse-mounts/my_path] [32mPASSED | MEM 0.6/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+2.93s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.txt-text/plain]
+2.46s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-MLmodel-text/plain]
+1.68s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.pkl-application/octet-stream]
+1.68s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.pkl-application/octet-stream]
+1.49s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.txt-text/plain]
+1.31s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-MLmodel-text/plain]
+0.01s call     tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[None]
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m========== [32m224 passed[0m, [33m[1m9 skipped[0m, [33m[1m3 deselected[0m, [33m[1m14 warnings[0m[33m in 12.32s[0m[33m ==========[0m
+
+2026-01-16 19:47:02,609 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 19:47:09,948 - src.agents.base - INFO - VerificationAgent - LLM response (1850 chars):
+```json
+{
+    "poc_result": {
+        "passed": false,
+        "vulnerability_fixed": true,
+        "analysis": "The PoC (fix-run.sh) failed due to assertion errors in tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path. The failures are not due to the vulnerability being present, but because the error message returned is 'Invalid path: <path>' instead of the expected 'Invalid path'. All other tests, including those for encoded and obfuscated path traversal, passed, indicating the vulnerability is blocked."
+    },
+    "regression_result": {
+        "passed": true,
+        "tests_present": true,
+        "analysis": "unit_test.sh ran 233 selected tests with 224 passed, 9 skipped, and 0 failures. All functional and regression tests passed, indicating no regressions were introduced."
+    },
+    "overall_verdict": "FAIL_POC",
+    "feedback_for_planner": {
+        "issues": [
+            "PoC failed due to assertion errors in test_delete_artifact_mlflow_artifacts_throws_for_malicious_path.",
+            "Returned error message is 'Invalid path: <path>' but test expects 'Invalid path'."
+        ],
+        "suggestions": [
+            "Update the error message in validate_path_is_safe to return exactly 'Invalid path' (without the path detail) to match test expectations.",
+            "Alternatively, update the test to accept the new error message format if including the path is intentional and safe."
+        ],
+        "suspected_cause": "The patch changed the error message to include the path (e.g., 'Invalid path: /path'), but the test asserts for the exact string 'Invalid path'. This is a test/implementation mismatch, not a security failure.",
+        "output_excerpt": "AssertionError: assert 'Invalid path: /path' == 'Invalid path'\n- Invalid path\n+ Invalid path: /path"
+    }
+}
+```
+2026-01-16 19:47:09,951 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 19:47:16,773 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 19:47:16,774 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "PatchAgent",
+  "message": "In mlflow/utils/uri.py, update the validate_path_is_safe function so that it raises MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE) instead of including the path in the error message. This will match test expectations and resolve the assertion error."
+}
+2026-01-16 19:47:16,774 - src.agents.base - INFO - PatchAgent - LLM call prompt (1686 chars):
+## Message
+In mlflow/utils/uri.py, update the validate_path_is_safe function so that it raises MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE) instead of including the path in the error message. This will match test expectations and resolve the assertion error.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2023-6831",
+  "file_path": "mlflow/utils/uri.py",
+  "vulnerable_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2023-6831",
+  "cwe_id": [
+    "CWE-73",
+    "CWE-22"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "mlflow/utils/uri.py",
+      "start_line": 422,
+      "end_line": 446
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 19:47:16,813 - src.agents.base - DEBUG - PatchAgent starting agent run (max_turns=1000000)
+2026-01-16 19:47:16,813 - src.agents.base - DEBUG - PatchAgent - System prompt (1430 chars):
+You are a Security Patch Developer responsible for implementing vulnerability fixes.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear, concise feedback about the implementation.
+
+## Role
+You receive high-level guidance describing WHAT to fix, not HOW. You must implement the fix with correct, complete code.
+
+## Rules
+
+1. **ONLY edit the vulnerable file(s)**: You may ONLY modify files explicitly listed in the vulnerability location. Do NOT edit any other files.
+2. **Complete Code Only**: Every variable, function, regex pattern, or constant you reference MUST be defined
+3. **No Placeholders**: Never use placeholder names like `enhanced_pattern`, `new_validator`, `helper_function` without implementing them
+4. **No Undefined References**: If you add `foo(x)`, the function `foo` must exist or you must define it
+5. **Verify Before Edit**: After reading the file, mentally trace your new code to ensure all symbols resolve
+6. **Rigor**: Be thorough, defensive and rigorous in your implementation. If you spot any issues the planner did not account for, fix them and report back in your patch summary.
+
+## Guidelines
+- Minimal changes only; preserve behavior.
+- Use ReadFile before EditCode.
+- Ensure every referenced symbol is defined.
+
+## Output Format
+Return a JSON summary with patch_applied and a short change description.
+Be precise and careful. Incorrect patches waste verification cycles.
+2026-01-16 19:47:22,847 - src.agents.base - INFO - PatchAgent executing tool: EditCode
+2026-01-16 19:47:22,847 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "mlflow/utils/uri.py",
+  "old_code": "    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n\n    # Step 1: Repeatedly decode percent-encoded sequences\n    prev_path = None\n    decoded_path = path\n    while prev_path != decoded_path:\n        prev_path = decoded_path\n        decoded_path = urllib.parse.unquote(decoded_path)\n\n    # Step 2: Normalize the path using pathlib\n    if is_windows():\n        normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n        path_obj = pathlib.PureWindowsPath(decoded_path)\n    else:\n        normalized_path = str(pathlib.PurePosixPath(decoded_path))\n        path_obj = pathlib.PurePosixPath(decoded_path)\n\n    # Step 3: Apply the existing checks to the decoded, normalized path\n    if any((s in normalized_path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        normalized_path = local_file_uri_to_path(path)\n        # Re-apply decoding and normalization to the resolved file path\n        prev_path = None\n        decoded_path = normalized_path\n        while prev_path != decoded_path:\n            prev_path = decoded_path\n            decoded_path = urllib.parse.unquote(decoded_path)\n        if is_windows():\n            normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n            path_obj = pathlib.PureWindowsPath(decoded_path)\n        else:\n            normalized_path = str(pathlib.PurePosixPath(decoded_path))\n            path_obj = pathlib.PurePosixPath(decoded_path)\n\n    if (\n        any((s in normalized_path) for s in _OS_ALT_SEPS)\n        or \"..\" in list(path_obj.parts)\n        or path_obj.is_absolute()\n        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == \":\")\n    ):\n        raise exc\n",
+  "new_code": "    exc = MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)\n\n    # Step 1: Repeatedly decode percent-encoded sequences\n    prev_path = None\n    decoded_path = path\n    while prev_path != decoded_path:\n        prev_path = decoded_path\n        decoded_path = urllib.parse.unquote(decoded_path)\n\n    # Step 2: Normalize the path using pathlib\n    if is_windows():\n        normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n        path_obj = pathlib.PureWindowsPath(decoded_path)\n    else:\n        normalized_path = str(pathlib.PurePosixPath(decoded_path))\n        path_obj = pathlib.PurePosixPath(decoded_path)\n\n    # Step 3: Apply the existing checks to the decoded, normalized path\n    if any((s in normalized_path) for s in (\"#\", \"%23\")):\n        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)\n\n    if is_file_uri(path):\n        normalized_path = local_file_uri_to_path(path)\n        # Re-apply decoding and normalization to the resolved file path\n        prev_path = None\n        decoded_path = normalized_path\n        while prev_path != decoded_path:\n            prev_path = decoded_path\n            decoded_path = urllib.parse.unquote(decoded_path)\n        if is_windows():\n            normalized_path = str(pathlib.PureWindowsPath(decoded_path))\n            path_obj = pathlib.PureWindowsPath(decoded_path)\n        else:\n            normalized_path = str(pathlib.PurePosixPath(decoded_path))\n            path_obj = pathlib.PurePosixPath(decoded_path)\n\n    if (\n        any((s in normalized_path) for s in _OS_ALT_SEPS)\n        or \"..\" in list(path_obj.parts)\n        or path_obj.is_absolute()\n        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == \":\")\n    ):\n        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)\n",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 19:47:23,026 - src.tools.edit_code - INFO - EditCodeTool: Writing 18136 chars to mlflow/utils/uri.py (match_type=exact)
+2026-01-16 19:47:23,165 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 19:47:24,285 - src.agents.base - INFO - PatchAgent - LLM response (285 chars):
+{
+  "patch_applied": true,
+  "change_description": "The validate_path_is_safe function now raises MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE) instead of including the path in the error message. This matches test expectations and resolves the assertion error."
+}
+2026-01-16 19:47:24,285 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 19:47:25,542 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 19:47:25,546 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "VerificationAgent",
+  "message": "Re-run the PoC and regression tests to confirm that the error message change in validate_path_is_safe resolves the assertion error and all tests now pass."
+}
+2026-01-16 19:47:25,546 - src.agents.base - INFO - VerificationAgent - LLM call prompt (1570 chars):
+## Message
+Re-run the PoC and regression tests to confirm that the error message change in validate_path_is_safe resolves the assertion error and all tests now pass.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2023-6831",
+  "file_path": "mlflow/utils/uri.py",
+  "vulnerable_code": "def validate_path_is_safe(path):\n    \"\"\"\n    Validates that the specified path is safe to join with a trusted prefix. This is a security\n    measure to prevent path traversal attacks.\n    A valid path should:\n        not contain separators other than '/'\n        not contain .. to navigate to parent dir in path\n        not be an absolute path\n    \"\"\"\n    from mlflow.utils.file_utils import local_file_uri_to_path\n\n    exc = MlflowException(f\"Invalid path: {path}\", error_code=INVALID_PARAMETER_VALUE)\n    if any((s in path) for s in (\"#\", \"%23\")):\n        raise exc\n\n    if is_file_uri(path):\n        path = local_file_uri_to_path(path)\n    if (\n        any((s in path) for s in _OS_ALT_SEPS)\n        or \"..\" in path.split(\"/\")\n        or pathlib.PureWindowsPath(path).is_absolute()\n        or pathlib.PurePosixPath(path).is_absolute()\n        or (is_windows() and len(path) >= 2 and path[1] == \":\")\n    ):\n        raise exc",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2023-6831",
+  "cwe_id": [
+    "CWE-73",
+    "CWE-22"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "mlflow/utils/uri.py",
+      "start_line": 422,
+      "end_line": 446
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 19:47:25,577 - src.agents.base - DEBUG - VerificationAgent starting agent run (max_turns=1000000)
+2026-01-16 19:47:25,577 - src.agents.base - DEBUG - VerificationAgent - System prompt (3831 chars):
+You are a Security Verification Engineer responsible for validating vulnerability patches.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear test results and feedback.
+
+## Role
+
+After a patch is applied, you verify it using PatchEval's validation scripts:
+1. Run the PoC (Proof of Concept) test to verify the vulnerability is fixed
+2. Run the unit test suite (if present) to verify no regressions were introduced
+3. Produce structured feedback for the Planner if the patch fails
+
+## Tools
+
+### RunTest
+Runs PatchEval validation scripts in sequence:
+1. **prepare.sh** - Resets the repository to a clean state
+2. **fix-run.sh** - Executes the PoC to verify the vulnerability is patched
+3. **unit_test.sh** - (if present) Runs unit tests for functional correctness
+
+Parameters:
+- `run_prepare`: Whether to run prepare.sh first (default: true)
+- `timeout`: Timeout in seconds for each script (default: 120)
+ - `include_paths`: Optional list of file paths to limit the diff used to build /workspace/fix.patch. Pass the files you edited (e.g., from EditCode).
+
+The tool automatically:
+- Extracts the git diff from your applied changes
+- Writes it to /workspace/fix.patch
+- Runs the validation scripts
+- Returns the raw stdout/stderr output
+
+## Test Output Rules
+
+**YOU must read the stdout/stderr output to determine if tests pass or fail.**
+
+The RunTest tool returns raw output - it does NOT tell you if tests passed. You must analyze:
+
+### For PoC (fix-run.sh):
+- **PASS indicators**: "test passed", "vulnerability fixed", "OK", exit code 0 with no errors
+- **FAIL indicators**: tracebacks, exceptions, "FAILED", "AssertionError", "vulnerability still present"
+
+### For Unit Tests (unit_test.sh):
+- **PASS indicators**: "OK", "passed", "0 failures", all tests green
+- **FAIL indicators**: "FAILED", "ERROR", assertion failures, exceptions, non-zero failure count
+
+### Exit Codes:
+- Exit code 0 usually means success, but ALWAYS verify by reading the actual output
+- Exit code non-zero usually means failure, but check the output for details
+
+## Workflow
+
+1. **Call RunTest**: Simply call the RunTest tool - it handles setup automatically
+2. **READ THE OUTPUT CAREFULLY**: The tool returns raw stdout/stderr - analyze it to determine:
+   - Did the PoC test pass? (vulnerability fixed?)
+   - Did unit tests pass? (no regressions?)
+3. **Provide Feedback**: Based on YOUR analysis of the output, provide actionable feedback
+ 4. When calling RunTest, if `edited_files` are provided in context, pass them via `include_paths` to restrict the patch to only those files.
+
+## Output Format
+
+After running the test and READING THE OUTPUT, provide your analysis:
+
+```json
+{
+    "poc_result": {
+        "passed": true/false, true if and only if the test conclusively shows the vulnerability is fixed
+        "vulnerability_fixed": true/false,
+        "analysis": "What you observed in the fix-run.sh output that led to this conclusion"
+    },
+    "regression_result": {
+        "passed": true/false, true if and only if all unit tests passed
+        "tests_present": true/false,
+        "analysis": "What you observed in the unit_test.sh output (if present)"
+    },
+    "overall_verdict": "PASS" | "FAIL_POC" | "FAIL_REGRESSION",
+    "feedback_for_planner": {
+        "issues": ["List of specific issues from the test output"],
+        "suggestions": ["Concrete suggestions for fixing the issues"],
+        "suspected_cause": "Analysis of the root cause of failures",
+        "output_excerpt": "Relevant portion of test output showing the failure"
+    }
+}
+```
+
+Be thorough in your analysis. Quote specific lines from the output to support your conclusions. If a test fails, you must mark it as such, there is no room for interpretation in that case. If either poc or unit tests are missing, you may mark them as passed
+2026-01-16 19:47:28,799 - src.agents.base - INFO - VerificationAgent executing tool: RunTest
+2026-01-16 19:47:28,800 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "mlflow/utils/uri.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 19:47:29,119 - src.tools.run_test - INFO - Extracted 4 file paths from /workspace/test.patch: ['tests/utils/test_uri.py', 'tests/tracking/test_rest_tracking.py', 'tests/server/test_handlers.py', 'tests/store/artifact/test_http_artifact_repo.py']
+2026-01-16 19:47:29,119 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 19:47:29,119 - src.tools.run_test - INFO -   include_paths: ['mlflow/utils/uri.py']
+2026-01-16 19:47:29,119 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/utils/test_uri.py', 'tests/tracking/test_rest_tracking.py', 'tests/server/test_handlers.py', 'tests/store/artifact/test_http_artifact_repo.py']
+2026-01-16 19:47:29,119 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'mlflow/utils/uri.py' ':(exclude)tests/utils/test_uri.py' ':(exclude)tests/tracking/test_rest_tracking.py' ':(exclude)tests/server/test_handlers.py' ':(exclude)tests/store/artifact/test_http_artifact_repo.py'
+2026-01-16 19:47:29,265 - src.tools.run_test - INFO -   Generated patch: 2618 bytes, 62 lines
+2026-01-16 19:47:29,265 - src.tools.run_test - INFO -   Patch content:
+diff --git a/mlflow/utils/uri.py b/mlflow/utils/uri.py
+index 331648b..039f76b 100644
+--- a/mlflow/utils/uri.py
++++ b/mlflow/utils/uri.py
+@@ -430,17 +430,47 @@ def validate_path_is_safe(path):
+     """
+     from mlflow.utils.file_utils import local_file_uri_to_path
+ 
+-    exc = MlflowException(f"Invalid path: {path}", error_code=INVALID_PARAMETER_VALUE)
+-    if any((s in path) for s in ("#", "%23")):
+-        raise exc
++    exc = MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
++
++    # Step 1: Repeatedly decode percent-encoded sequences
++    prev_path = None
++    decoded_path = path
++    while prev_path != decoded_path:
++        prev_path = decoded_path
++        decoded_path = urllib.parse.unquote(decoded_path)
++
++    # Step 2: Normalize the path using pathlib
++    if is_windows():
++        normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++        path_obj = pathlib.PureWindowsPath(decoded_path)
++    else:
++        normalized_path = str(pathlib.PurePosixPath(decoded_path))
++        path_obj = pathlib.PurePosixPath(decoded_path)
++
++    # Step 3: Apply the existing checks to the decoded, normalized path
++    if any((s in normalized_path) for s in ("#", "%23")):
++        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
+ 
+     if is_file_uri(path):
+-        path = local_file_uri_to_path(path)
++        normalized_path = local_file_uri_to_path(path)
++        # Re-apply decoding and normalization to the resolved file path
++        prev_path = None
++        decoded_path = normalized_path
++        while prev_path != decoded_path:
++            prev_path = decoded_path
++            decoded_path = urllib.parse.unquote(decoded_path)
++        if is_windows():
++            normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++            path_obj = pathlib.PureWindowsPath(decoded_path)
++        else:
++            normalized_path = str(pathlib.PurePosixPath(decoded_path))
++            path_obj = pathlib.PurePosixPath(decoded_path)
++
+     if (
+-        any((s in path) for s in _OS_ALT_SEPS)
+-        or ".." in path.split("/")
+-        or pathlib.PureWindowsPath(path).is_absolute()
+-        or pathlib.PurePosixPath(path).is_absolute()
+-        or (is_windows() and len(path) >= 2 and path[1] == ":")
++        any((s in normalized_path) for s in _OS_ALT_SEPS)
++        or ".." in list(path_obj.parts)
++        or path_obj.is_absolute()
++        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == ":")
+     ):
+-        raise exc
++        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
++
+
+2026-01-16 19:47:29,345 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 19:47:29,975 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 19:47:30,065 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/mlflow/utils/uri.py b/mlflow/utils/uri.py
+index 331648b..039f76b 100644
+--- a/mlflow/utils/uri.py
++++ b/mlflow/utils/uri.py
+@@ -430,17 +430,47 @@ def validate_path_is_safe(path):
+     """
+     from mlflow.utils.file_utils import local_file_uri_to_path
+ 
+-    exc = MlflowException(f"Invalid path: {path}", error_code=INVALID_PARAMETER_VALUE)
+-    if any((s in path) for s in ("#", "%23")):
+-        raise exc
++    exc = MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
++
++    # Step 1: Repeatedly decode percent-encoded sequences
++    prev_path = None
++    decoded_path = path
++    while prev_path != decoded_path:
++        prev_path = decoded_path
++        decoded_path = urllib.parse.unquote(decoded_path)
++
++    # Step 2: Normalize the path using pathlib
++    if is_windows():
++        normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++        path_obj = pathlib.PureWindowsPath(decoded_path)
++    else:
++        normalized_path = str(pathlib.PurePosixPath(decoded_path))
++        path_obj = pathlib.PurePosixPath(decoded_path)
++
++    # Step 3: Apply the existing checks to the decoded, normalized path
++    if any((s in normalized_path) for s in ("#", "%23")):
++        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
+ 
+     if is_file_uri(path):
+-        path = local_file_uri_to_path(path)
++        normalized_path = local_file_uri_to_path(path)
++        # Re-apply decoding and normalization to the resolved file path
++        prev_path = None
++        decoded_path = normalized_path
++        while prev_path != decoded_path:
++            prev_path = decoded_path
++            decoded_path = urllib.parse.unquote(decoded_path)
++        if is_windows():
++            normalized_path = str(pathlib.PureWindowsPath(decoded_path))
++            path_obj = pathlib.PureWindowsPath(decoded_path)
++        else:
++            normalized_path = str(pathlib.PurePosixPath(decoded_path))
++            path_obj = pathlib.PurePosixPath(decoded_path)
++
+     if (
+-        any((s in path) for s in _OS_ALT_SEPS)
+-        or ".." in path.split("/")
+-        or pathlib.PureWindowsPath(path).is_absolute()
+-        or pathlib.PurePosixPath(path).is_absolute()
+-        or (is_windows() and len(path) >= 2 and path[1] == ":")
++        any((s in normalized_path) for s in _OS_ALT_SEPS)
++        or ".." in list(path_obj.parts)
++        or path_obj.is_absolute()
++        or (is_windows() and len(normalized_path) >= 2 and normalized_path[1] == ":")
+     ):
+-        raise exc
++        raise MlflowException('Invalid path', error_code=INVALID_PARAMETER_VALUE)
++
+
+
+2026-01-16 19:47:32,836 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 19:47:32,836 - src.tools.run_test - INFO - fix-run.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2023-6831/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 26 items
+
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[path/../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 11%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/etc/passwd%00.jpg] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 15%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[/file://etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 19%][0m
+tests/server/test_handlers.py::test_delete_artifact_mlflow_artifacts_throws_for_malicious_path[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[/tmp/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 26%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[../../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 30%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts_malicious_path[%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 34%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 38%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[../../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 46%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[./../path] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 50%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[path/../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 53%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[path/../../to/file] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[file://a#/..//tmp] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 61%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[file://a%23/..//tmp/] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 65%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.jpg] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 73%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.html] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 76%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.txt] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 80%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.php] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/etc/passwd%00.asp] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 88%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[/file://etc/passwd] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 92%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_validate_path_is_safe_bad[%2E%2E%2F%2E%2E%2Fpath] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m======================= [32m26 passed[0m, [33m[1m14 warnings[0m[33m in 0.31s[0m[33m ========================[0m
+
+2026-01-16 19:47:32,931 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 19:47:33,543 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 19:47:45,133 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 19:47:45,135 - src.tools.run_test - INFO - unit_test.sh output:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.8.20, pytest-8.3.5, pluggy-1.5.0 -- /workspace/PoC_env/CVE-2023-6831/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/mlflow
+configfile: pytest.ini
+plugins: timeout-2.3.1, anyio-4.5.2, cov-5.0.0, localserver-0.5.0
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+[1mcollecting ... [0mcollected 236 items / 3 deselected / 233 selected
+
+tests/server/test_handlers.py::test_health [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  0%][0m
+tests/server/test_handlers.py::test_version [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  0%][0m
+tests/server/test_handlers.py::test_get_endpoints [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  1%][0m
+tests/server/test_handlers.py::test_all_model_registry_endpoints_available [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  1%][0m
+tests/server/test_handlers.py::test_can_parse_json [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  2%][0m
+tests/server/test_handlers.py::test_can_parse_post_json_with_content_type_params [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_parse_get_json_with_unknown_fields [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_parse_json_string [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  3%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_invalid_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_can_block_post_request_with_missing_content_type [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  4%][0m
+tests/server/test_handlers.py::test_search_runs_default_view_type [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  5%][0m
+tests/server/test_handlers.py::test_log_batch_api_req [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  5%][0m
+tests/server/test_handlers.py::test_catch_mlflow_exception [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_create_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_get_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  6%][0m
+tests/server/test_handlers.py::test_update_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_rename_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  7%][0m
+tests/server/test_handlers.py::test_delete_registered_model [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  8%][0m
+tests/server/test_handlers.py::test_search_registered_models [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  8%][0m
+tests/server/test_handlers.py::test_get_latest_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_create_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_set_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [  9%][0m
+tests/server/test_handlers.py::test_delete_registered_model_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 10%][0m
+tests/server/test_handlers.py::test_get_model_version_details [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 10%][0m
+tests/server/test_handlers.py::test_update_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 11%][0m
+tests/server/test_handlers.py::test_transition_model_version_stage [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 11%][0m
+tests/server/test_handlers.py::test_delete_model_version [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_get_model_version_download_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_search_model_versions [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 12%][0m
+tests/server/test_handlers.py::test_set_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 13%][0m
+tests/server/test_handlers.py::test_delete_model_version_tag [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 13%][0m
+tests/server/test_handlers.py::test_set_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_delete_registered_model_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 14%][0m
+tests/server/test_handlers.py::test_get_model_version_by_alias [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_artifact_uri_factory[http] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_artifact_uri_factory[https] [32mPASSED | MEM 0.7/3.8 GB | DISK 78.8/1006.9 GB[0m[33m [ 15%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.txt-text/plain] [32mPASSED | MEM 0.8/3.8 GB | DISK 79.3/1006.9 GB[0m[33m [ 16%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.pkl-application/octet-stream] [32mPASSED | MEM 0.9/3.8 GB | DISK 79.8/1006.9 GB[0m[33m [ 16%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-MLmodel-text/plain] [32mPASSED | MEM 0.8/3.8 GB | DISK 80.3/1006.9 GB[0m[33m [ 17%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.txt-text/plain] [32mPASSED | MEM 0.9/3.8 GB | DISK 80.8/1006.9 GB[0m[33m [ 17%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.pkl-application/octet-stream] [32mPASSED | MEM 1.0/3.8 GB | DISK 81.3/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-MLmodel-text/plain] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifacts[None] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 18%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_log_artifacts[dir] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 19%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_list_artifacts [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 19%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_file[a.txt] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 20%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_file[dir/b.xtx] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 20%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_download_artifacts [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_default_host_creds [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[a.txt] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 21%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[dir/b.txt] [32mPASSED | MEM 1.1/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 22%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[None] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 22%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_create_multipart_upload [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_complete_multipart_upload [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 23%][0m
+tests/store/artifact/test_http_artifact_repo.py::test_abort_multipart_upload [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_extract_db_type_from_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB-result0] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 24%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB/-result1] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 25%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://aAbB/path-result2] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 25%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile:prefix-result3] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 26%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile:prefix/extra-result4] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 26%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[nondatabricks://profile:prefix-result5] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile-result6] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks://profile/-result7] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 27%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile:prefix-result8] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 28%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile:prefix/extra-result9] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 28%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile-result10] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 29%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri[databricks-uc://profile/-result11] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 29%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks:/profile:prefix] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks:/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_no_netloc[databricks://] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 30%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix:extra] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 31%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix:extra  ] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 31%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix extra] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 32%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:prefix  ] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 32%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile ] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile:] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_get_db_info_from_uri_errors_invalid_profile[databricks://profile: ] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 33%][0m
+tests/utils/test_uri.py::test_is_local_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 34%][0m
+tests/utils/test_uri.py::test_is_local_uri_windows [33mSKIPPED[0m (Windows-...)[33m [ 34%][0m
+tests/utils/test_uri.py::test_is_databricks_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 35%][0m
+tests/utils/test_uri.py::test_is_http_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 35%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_joins_uri_paths_and_posixpaths_correctly [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_handles_special_uri_characters_in_posixpaths [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params0-https://example.com?key=value] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 36%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com-existing_key=existing_value-query_params1-https://example.com?existing_key=existing_value&new_key=new_value] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 37%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params2-https://example.com?key1=value1&key2=value2&key3=value3] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 37%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params3-https://example.com?key=value+with+spaces&key2=special%23characters] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 38%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[--query_params4-?key=value] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 38%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params5-https://example.com] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com--query_params6-https://example.com?key1=123&key2=456] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[https://example.com?existing_key=existing_value--query_params7-https://example.com?existing_key=existing_value&existing_key=new_value&existing_key=new_value_2] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 39%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[s3://bucket/key-prev1=foo&prev2=bar-query_params8-s3://bucket/key?prev1=foo&prev2=bar&param1=value1&param2=value2] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 40%][0m
+tests/utils/test_uri.py::test_append_to_uri_query_params_appends_as_expected[s3://bucket/key?existing_param=existing_value--query_params9-s3://bucket/key?existing_param=existing_value&new_param=new_value] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 40%][0m
+tests/utils/test_uri.py::test_append_to_uri_path_preserves_uri_schemes_hosts_queries_and_fragments [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 41%][0m
+tests/utils/test_uri.py::test_extract_and_normalize_path [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 41%][0m
+tests/utils/test_uri.py::test_is_databricks_acled_artifacts_uri [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[ftp://user:pass@realhost:port/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs:/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 42%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 43%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://incorrect:netloc:format/path/to/nowhere-None-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 43%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 44%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks/-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 44%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks:port/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 45%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks:port/path/to/nowhere-databricks-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 46%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks/path/to/nowhere-databricks://profile-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 46%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks:port/path/to/nowhere-databricks://profile-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 47%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 47%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks:port/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[runs://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[models://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 48%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[s3://scope:key_prefix@databricks/path/abc-databricks://scope:key_prefix-databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 49%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[ftp://user:pass@realhost:port/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 49%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs:/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 50%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 50%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://incorrect:netloc:format/path/to/nowhere-None-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc/-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 51%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 52%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://databricks-uc:port/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 52%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks-uc/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 53%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://@databricks-uc:port/path/to/nowhere-databricks-uc-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 53%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks-uc/path/to/nowhere-databricks-uc://profile-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://profile@databricks-uc:port/path/to/nowhere-databricks-uc://profile-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 54%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[dbfs://scope:key_prefix@databricks-uc:port/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 55%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[runs://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 55%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[models://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 56%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri[s3://scope:key_prefix@databricks-uc/path/abc-databricks-uc://scope:key_prefix-databricks-uc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 56%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://incorrect:netloc:format@databricks/path/a] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://scope::key_prefix@databricks/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_get_databricks_profile_uri_from_artifact_uri_error_cases[dbfs://scope:key_prefix:@databricks/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 57%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[ftp://user:pass@realhost:port/path/nowhere-ftp://user:pass@realhost:port/path/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 58%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs:/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 58%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://nondatabricks/path/to/nowhere-dbfs://nondatabricks/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 59%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://incorrect:netloc:format/path/-dbfs://incorrect:netloc:format/path/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 59%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks-dbfs:] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks/-dbfs:/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 60%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 61%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 61%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://@databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 62%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://profile@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 62%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://profile@databricks:port/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://scope:key_prefix@databricks/path/abc-dbfs:/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://scope:key_prefix@databricks:port/path/abc-dbfs:/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 63%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[dbfs://incorrect:netloc:format@databricks/path/to/nowhere-dbfs:/path/to/nowhere] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 64%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[runs://scope:key_prefix@databricks/path/abc-runs:/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 64%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[models://scope:key_prefix@databricks/path/abc-models:/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 65%][0m
+tests/utils/test_uri.py::test_remove_databricks_profile_info_from_artifact_uri[s3://scope:key_prefix@databricks/path/abc-s3:/path/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 65%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b-databricks-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks-dbfs://databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://Profile-dbfs://Profile@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 66%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://profile/-dbfs://profile@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 67%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://scope:key-dbfs://scope:key@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 67%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-databricks://scope:key/random_stuff-dbfs://scope:key@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 68%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs:/path/a/b/-nondatabricks://profile-dbfs:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 68%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[runs:/path/a/b/-databricks://Profile-runs://Profile@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[runs:/path/a/b/-nondatabricks://profile-runs:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[models:/path/a/b/-databricks://profile-models://profile@databricks/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 69%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[models:/path/a/b/-nondatabricks://Profile-models:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 70%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[s3:/path/a/b/-databricks://Profile-s3:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 70%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[s3:/path/a/b/-nondatabricks://profile-s3:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 71%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp:/path/a/b/-databricks://profile-ftp:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 71%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp:/path/a/b/-nondatabricks://Profile-ftp:/path/a/b/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp://user:pass@host:port/a/b-databricks://Profile-ftp://user:pass@host:port/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[ftp://user:pass@host:port/a/b-nothing://Profile-ftp://user:pass@host:port/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 72%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks-databricks://OtherProfile-dbfs://databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 73%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks-nondatabricks://Profile-dbfs://databricks] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 73%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks/path/a/b-databricks://OtherProfile-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 74%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://databricks/path/a/b-nondatabricks://Profile-dbfs://databricks/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 74%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://@databricks/path/a/b-databricks://OtherProfile-dbfs://@databricks/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://@databricks/path/a/b-nondatabricks://Profile-dbfs://@databricks/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/pp-databricks://OtherProfile-dbfs://profile@databricks/pp] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 75%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/path-databricks://profile-dbfs://profile@databricks/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 76%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri[dbfs://profile@databricks/path-nondatabricks://Profile-dbfs://profile@databricks/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 76%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b-databricks://not:legit:auth] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 77%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope::key] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 77%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope:key:/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_add_databricks_profile_info_to_artifact_uri_errors[dbfs:/path/a/b/-databricks://scope:key ] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs:/path/a/b-True] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 78%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://databricks/a/b-True] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 79%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://@databricks/a/b-True] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 79%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://profile@databricks/a/b-True] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 80%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key@databricks/a/b-True] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 80%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key:@databricks/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope::key@databricks/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://profile@notdatabricks/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 81%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key@notdatabricks/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 82%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://scope:key/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 82%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[dbfs://notdatabricks/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 83%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[s3:/path/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 83%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[ftp://user:pass@host:port/path/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_is_valid_dbfs_uri[ftp://user:pass@databricks/path/a/b-False] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[/tmp/path-/dbfs/tmp/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 84%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/path-/dbfs/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 85%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/path/a/b-/dbfs/path/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 85%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path[dbfs:/dbfs/123/abc-/dbfs/dbfs/123/abc] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 86%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[some/relative/local/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 86%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[s3:/some/s3/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_dbfs_hdfs_uri_to_fuse_path_raises[C:/cool/windows/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[my/path-{cwd}/my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 87%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[#my/path?a=b-{cwd}/#my/path?a=b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 88%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file://myhostname/my/path-file://myhostname/my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 88%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file:///my/path-file:///{drive}my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 89%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[file:my/path-file://{cwd}/my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 89%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[/home/my/path-/home/my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[dbfs://databricks/a/b-dbfs://databricks/a/b] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local[s3://host/my/path-s3://host/my/path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 90%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[my/path-file://{cwd}/my/path] [33mSKIPPED[0m[33m [ 91%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[#my/path?a=b-file://{cwd}/#my/path?a=b] [33mSKIPPED[0m[33m [ 91%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file://myhostname/my/path-file://myhostname/my/path] [33mSKIPPED[0m[33m [ 92%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file:///my/path-file:///{drive}my/path] [33mSKIPPED[0m[33m [ 92%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[file:my/path-file://{cwd}/my/path] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[/home/my/path-file:///{drive}home/my/path] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[dbfs://databricks/a/b-dbfs://databricks/a/b] [33mSKIPPED[0m[33m [ 93%][0m
+tests/utils/test_uri.py::test_resolve_uri_if_local_on_windows[s3://host/my/path-s3://host/my/path] [33mSKIPPED[0m[33m [ 94%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/dbfs/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 94%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[dbfs:/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 95%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/Volumes/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 95%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[/.fuse-mounts/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[//dbfs////my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[///Volumes/] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 96%][0m
+tests/utils/test_uri.py::test_correctly_detect_fuse_and_uc_uris[dbfs://my///path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 97%][0m
+tests/utils/test_uri.py::test_negative_detection[/My_Volumes/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 97%][0m
+tests/utils/test_uri.py::test_negative_detection[s3a:/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 98%][0m
+tests/utils/test_uri.py::test_negative_detection[Volumes/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 98%][0m
+tests/utils/test_uri.py::test_negative_detection[Volume:/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 99%][0m
+tests/utils/test_uri.py::test_negative_detection[dbfs/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [ 99%][0m
+tests/utils/test_uri.py::test_negative_detection[/fuse-mounts/my_path] [32mPASSED | MEM 0.7/3.8 GB | DISK 81.8/1006.9 GB[0m[33m [100%][0m
+
+============================= slowest 10 durations =============================
+1.72s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.txt-text/plain]
+1.63s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-MLmodel-text/plain]
+1.47s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[dir-c.pkl-application/octet-stream]
+1.36s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.txt-text/plain]
+1.32s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-c.pkl-application/octet-stream]
+1.17s call     tests/store/artifact/test_http_artifact_repo.py::test_log_artifact[None-MLmodel-text/plain]
+0.02s call     tests/store/artifact/test_http_artifact_repo.py::test_delete_artifacts[None]
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+[33m========== [32m224 passed[0m, [33m[1m9 skipped[0m, [33m[1m3 deselected[0m, [33m[1m14 warnings[0m[33m in 9.42s[0m[33m ===========[0m
+
+2026-01-16 19:47:45,139 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 19:47:49,411 - src.agents.base - INFO - VerificationAgent - LLM response (900 chars):
+```json
+{
+    "poc_result": {
+        "passed": true,
+        "vulnerability_fixed": true,
+        "analysis": "All PoC tests in fix-run.sh passed (26 passed, 0 failed). No assertion errors or tracebacks were observed. This confirms that the error message change resolved the previous assertion error and the path traversal vulnerability remains blocked."
+    },
+    "regression_result": {
+        "passed": true,
+        "tests_present": true,
+        "analysis": "unit_test.sh ran 233 selected tests with 224 passed, 9 skipped, and 0 failures. All functional and regression tests passed, indicating no regressions were introduced."
+    },
+    "overall_verdict": "PASS",
+    "feedback_for_planner": {
+        "issues": [],
+        "suggestions": [],
+        "suspected_cause": "",
+        "output_excerpt": "fix-run.sh: 26 passed, 0 failed\nunit_test.sh: 224 passed, 9 skipped, 0 failed"
+    }
+}
+```
+2026-01-16 19:47:49,411 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 19:47:52,789 - src.agents.base - INFO - CoordinatorAgent - LLM response (425 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "Path traversal and improper input validation in validate_path_is_safe allowed encoded and obfuscated traversal attempts (CWE-22, CWE-73).",
+  "fix": "The function now decodes percent-encoded sequences, normalizes the path, and applies security checks to the decoded, normalized path. The error message was also updated to match test expectations.",
+  "iterations": 2
+}
+```
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - INFO - Extracted patch via /workspace/fix.patch (2619 bytes)
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - INFO - Extracted patch via git diff (2619 bytes)
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - DEBUG - Extracting edited files from 2 rounds
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - DEBUG - Round 1: no patch_result
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - DEBUG - Round 2: no patch_result
+2026-01-16 19:47:53,103 - task-CVE-2023-6831-8373870784 - DEBUG - Total edited files extracted: 0

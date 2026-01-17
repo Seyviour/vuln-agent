@@ -1,0 +1,1400 @@
+2026-01-16 21:37:27,689 - task-CVE-2022-36087-8373870784 - INFO - Running multi-agent for CVE-2022-36087 in container multi_agent_eval_cve-2022-36087_tmp_c5330044
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: ReadFile
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: FindClass
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: EditCode
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: RunTest
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: SymbolVerify
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered tool: AskAgent
+2026-01-16 21:37:27,730 - src.tools.registry - DEBUG - Registered 6 default tools
+2026-01-16 21:37:27,730 - src.agents.base - INFO - CoordinatorAgent - LLM call prompt (918 chars):
+## Your Mission
+
+Fix the security vulnerability in this codebase.
+
+## Vulnerability Details
+
+**CVE:** CVE-2022-36087
+**CWE:** ['CWE-601']
+**Affected File:** oauthlib/uri_validate.py
+**Vulnerable Locations:**
+Not provided.
+
+### Description
+No description provided. You'll need to investigate.
+
+### Vulnerable Code Snippet (may be stale vs line numbers)
+```python
+#   IPv6address
+IPv6address = r"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+"
+```
+
+## Get Started
+
+1. First, ask ContextKnowledgeAgent to analyze the vulnerable files/locations and explain the security issue
+2. Based on their analysis, formulate YOUR fix strategy
+3. Ask PatchAgent to implement your fix
+4. Ask VerificationAgent to run tests
+5. Iterate if needed
+
+You must account for **all** listed vulnerable locations (multiple hunks/files may be affected).
+
+Remember: YOU are the strategist. You decide what to do. Specialists help you research and execute.
+
+Begin!
+
+2026-01-16 21:37:27,761 - src.agents.base - DEBUG - CoordinatorAgent starting agent run (max_turns=1000000)
+2026-01-16 21:37:27,761 - src.agents.base - DEBUG - CoordinatorAgent - System prompt (3914 chars):
+You are a Security Patch Coordinator. You lead a team of specialists to fix security vulnerabilities.
+
+## Role
+
+You are both the **strategist** and **orchestrator**. You:
+1. Analyze vulnerabilities and formulate fix strategies
+2. Delegate research and implementation to specialists
+3. Learn from failures and iterate until successful
+
+## Specialists
+
+Use the **AskAgent** tool to consult specialists:
+
+### ContextKnowledgeAgent (Research)
+Ask them to:
+- Read and analyze code files
+- Explain code patterns and security flows
+- Provide CWE/CVE remediation guidance
+- Investigate test files and expected behaviors
+
+Example: "Read h11/_readers.py and explain how ChunkedReader handles line terminators"
+
+### PatchAgent (Implementation)
+Ask them to:
+- Apply specific code changes you've designed
+- They have EditCode tool access
+
+Example: "In _readers.py, modify the __call__ method to reject bare \n line terminators"
+
+### VerificationAgent (Testing)
+Ask them to:
+- Run PoC (proof of concept) tests to verify the vulnerability is fixed
+- Run regression tests to ensure nothing broke
+
+Example: "Run the PoC and regression tests to verify the patch"
+
+## Tools
+
+You also have direct access to:
+- **ReadFile**: Quick file reads (for simple checks)
+- **EditCode**: Apply changes directly (if you're confident)
+- **RunTest**: Run tests directly
+
+## Strategy
+
+When planning a fix, consider:
+
+1. **Minimal change** - Smallest diff that fixes the vulnerability
+2. **Preserve behavior** - Don't break existing functionality
+3. **Match conventions** - Follow the repo's existing patterns
+4. **Security completeness** - Block all attack vectors, not just the PoC
+
+## Workflow
+
+### Phase 1: Understand
+- Ask ContextKnowledgeAgent to analyze the vulnerable code
+- Understand what the code does and why it's vulnerable
+- Look at related tests to understand expected behavior
+
+### Phase 2: Strategize (YOU DO THIS - no Planner needed)
+- Formulate 1-2 fix approaches
+- Consider trade-offs
+- Choose the best approach
+- Be specific about what needs to change
+
+### Phase 3: Implement
+- Ask PatchAgent to apply your chosen fix
+- Be specific: which file, which function, what change
+
+### Phase 4: Verify
+- Ask VerificationAgent to run tests
+- If tests fail, analyze why and iterate
+
+### Phase 5: Iterate (if needed)
+- If the fix didn't work, DON'T just retry the same thing
+- Ask ContextKnowledgeAgent for more context
+- Revise your strategy based on what you learned
+- Try a different approach
+
+## Communication
+
+Have **natural conversations** with your specialists:
+
+GOOD: "I see the vulnerability is in extract(). Can you show me how 'name' flows through the function?"
+BAD: "Analyze constraint_sheet and produce knowledge_packet"
+
+GOOD: "The last patch failed because we didn't handle absolute paths. Let's add that check."
+BAD: "Generate strategy for iteration 2"
+
+## Output Format
+
+When you've successfully fixed the vulnerability (tests pass):
+```json
+{
+  "status": "success",
+  "vulnerability": "Brief description of what was wrong",
+  "fix": "Brief description of the fix applied",
+  "iterations": <number>
+}
+```
+
+If you've exhausted attempts without success:
+```json
+{
+  "status": "failed",
+  "vulnerability": "What we understood about the issue",
+  "attempts": ["Attempt 1: tried X, failed because Y", "Attempt 2: ..."],
+  "blocker": "Why we couldn't fix it"
+}
+```
+
+## Rules
+
+1. **YOU are the strategist** - Feel free to consult with specialists but you must make the final decisions
+2. **Specialists execute** - ContextAgent researches, PatchAgent implements, VerificationAgent tests
+3. **Learn from failures** - Each iteration should try something DIFFERENT
+4. **Be specific** - Vague instructions lead to vague results
+5. **Stay focused** - Only modify the vulnerable file(s), not the whole codebase
+6. **Workflow** - Follow the Understand -> Strategize -> Implement -> Verify -> Iterate process for the first patch at least
+
+2026-01-16 21:37:30,128 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 21:37:30,130 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "ContextKnowledgeAgent",
+  "message": "Please analyze oauthlib/uri_validate.py, focusing on the definition and use of the IPv6address regex. Explain how this code could be vulnerable to CWE-601 (Open Redirect), and describe any flows where user input could be improperly validated or redirected."
+}
+2026-01-16 21:37:30,131 - src.agents.base - INFO - ContextKnowledgeAgent - LLM call prompt (1348 chars):
+## Message
+Please analyze oauthlib/uri_validate.py, focusing on the definition and use of the IPv6address regex. Explain how this code could be vulnerable to CWE-601 (Open Redirect), and describe any flows where user input could be improperly validated or redirected.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2022-36087",
+  "file_path": "oauthlib/uri_validate.py",
+  "vulnerable_code": "#   IPv6address\nIPv6address = r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\"",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2022-36087",
+  "cwe_id": [
+    "CWE-601"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "oauthlib/uri_validate.py",
+      "start_line": 68,
+      "end_line": 69
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null,
+  "repo_url": "https://github.com/oauthlib/oauthlib",
+  "work_dir": "",
+  "cwe_info": {},
+  "patch_description": "OAuthLib is an implementation of the OAuth request-signing logic for Python 3.6+. In OAuthLib versions 3.1.1 until 3.2.1, an attacker providing malicious redirect uri can cause denial of service. An attacker can also leverage usage of `uri_validate` functions depending where it is used. OAuthLib applications using OAuth2.0 provider support or use directly `uri_validate` are affected by this issue. Version 3.2.1 contains a patch. There are no known workarounds."
+}
+```
+2026-01-16 21:37:30,148 - src.agents.base - DEBUG - ContextKnowledgeAgent starting agent run (max_turns=1000000)
+2026-01-16 21:37:30,148 - src.agents.base - DEBUG - ContextKnowledgeAgent - System prompt (2211 chars):
+You are a Repository Expert and Security Knowledge Analyst.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide a clear, actionable response.
+
+## Role
+
+You are the **go-to expert** for understanding this codebase in the context of the vulnerability. Your role is to:
+
+1. **Build Deep Repository Understanding**: At initialization, thoroughly investigate the repository structure, architecture, and patterns around the vulnerable code. You should become intimately familiar with:
+   - How the vulnerable code fits into the broader system
+   - Dependencies, imports, and relationships with other components
+   - Coding patterns, conventions, and architectural decisions used in this repository
+   - Test infrastructure and validation approaches
+   - Build system and deployment considerations
+
+2. **Provide Contextual Constraints**: Create a detailed Constraint Sheet that captures:
+   - What can and cannot be modified
+   - Dependencies that must be preserved
+   - API contracts and interfaces that must be maintained
+   - Side effects to be aware of
+   - Edge cases specific to this repository
+   - Remediation strategies appropriate for this codebase architecture
+   - Potential pitfalls based on repository patterns
+
+4. **Synthesize Failure Insights**: If prior patch attempts failed, analyze the feedback and provide concrete guidance to avoid repeating mistakes.
+
+**Think of yourself as the repository specialist** who has spent time understanding the codebase deeply. Other agents will rely on your expertise to make informed decisions about how to safely patch the vulnerability without breaking the system.
+
+## Tools
+- ReadFile: Read file contents
+- FindClass: Find definitions and usages of symbols
+- SymbolVerify: Verify symbol definitions and imports
+
+## Output Format
+Return a single JSON object:
+
+```json
+{
+  "constraint_sheet": { ... },
+  "knowledge_packet": { ... },
+  "failure_insights": {
+    "issues": ["summary of observed problems or risks"],
+    "suspected_cause": "likely root cause of previous failure (if any)",
+    "suggestions": ["concrete guidance to fix or avoid failures"]
+  }
+}
+```
+
+If no prior feedback is provided, set "failure_insights" to an empty object.
+
+2026-01-16 21:37:31,355 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:31,355 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "start_line": 1,
+  "end_line": 80
+}
+2026-01-16 21:37:31,564 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:31,565 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:31,565 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "IPv6address",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:37:31,769 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:33,868 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:33,869 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "IP_literal",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:37:34,046 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:34,047 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:34,047 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "uri_validate",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:37:34,172 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:37,527 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:37,528 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_absolute_uri",
+  "search_type": "definition",
+  "file_pattern": "oauthlib/uri_validate.py"
+}
+2026-01-16 21:37:38,056 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:38,057 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:38,057 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "is_absolute_uri",
+  "search_type": "usage",
+  "file_pattern": "*.py"
+}
+2026-01-16 21:37:38,186 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:39,112 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:39,113 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "start_line": 180,
+  "end_line": 210
+}
+2026-01-16 21:37:39,268 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:41,201 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: FindClass
+2026-01-16 21:37:41,201 - src.agents.base - INFO - Tool arguments:
+{
+  "symbol_name": "absolute_URI",
+  "search_type": "definition",
+  "file_pattern": "oauthlib/uri_validate.py"
+}
+2026-01-16 21:37:41,711 - src.agents.base - INFO - Tool FindClass: ✓
+2026-01-16 21:37:42,769 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:42,769 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "start_line": 1,
+  "end_line": 120
+}
+2026-01-16 21:37:42,904 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:43,908 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:43,908 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "start_line": 121,
+  "end_line": 180
+}
+2026-01-16 21:37:44,055 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:47,536 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:47,537 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/oauth2/rfc6749/grant_types/base.py",
+  "start_line": 1,
+  "end_line": 30
+}
+2026-01-16 21:37:47,678 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:53,091 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:53,091 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/oauth2/rfc6749/grant_types/base.py",
+  "start_line": 220,
+  "end_line": 260
+}
+2026-01-16 21:37:53,249 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:55,502 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:55,502 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "tests/test_uri_validate.py",
+  "start_line": 1,
+  "end_line": 40
+}
+2026-01-16 21:37:55,657 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:37:55,658 - src.agents.base - INFO - ContextKnowledgeAgent executing tool: ReadFile
+2026-01-16 21:37:55,658 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/oauth2/rfc6749/grant_types/base.py",
+  "start_line": 1,
+  "end_line": 100
+}
+2026-01-16 21:37:55,776 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:38:10,098 - src.agents.base - INFO - ContextKnowledgeAgent - LLM response (3094 chars):
+```json
+{
+  "constraint_sheet": {
+    "modifiable_components": [
+      "Regex patterns in oauthlib/uri_validate.py, especially IPv6address and related URI validation regexes.",
+      "Validation logic in is_absolute_uri and related functions."
+    ],
+    "non_modifiable_components": [
+      "External API contracts: is_absolute_uri and related functions must maintain their interface (input/output types and semantics).",
+      "Downstream consumers (e.g., oauthlib.oauth2.rfc6749.grant_types.base) expect is_absolute_uri to accurately validate absolute URIs."
+    ],
+    "dependencies_to_preserve": [
+      "Regexes must remain compatible with RFC3986 as much as possible.",
+      "Any changes to validation must not break legitimate use cases (e.g., valid IPv6, IPv4, and reg-name URIs)."
+    ],
+    "api_contracts": [
+      "is_absolute_uri(uri: str) -> MatchObject or None: Returns a match if the URI is absolute, else None."
+    ],
+    "side_effects": [
+      "Overly permissive regex may allow malicious input to pass as valid, leading to open redirect vulnerabilities.",
+      "Overly strict regex may break legitimate OAuth flows for valid URIs."
+    ],
+    "edge_cases": [
+      "IPv6 addresses with unusual but valid formatting.",
+      "Malformed IPv6 addresses that could be interpreted as valid by the current regex.",
+      "Redirect URIs with embedded credentials, ports, or unusual schemes."
+    ],
+    "remediation_strategies": [
+      "Tighten the IPv6address regex to strictly conform to RFC3986.",
+      "Add explicit negative tests for malformed IPv6 and other edge cases.",
+      "Ensure that is_absolute_uri only returns True for syntactically valid absolute URIs."
+    ],
+    "potential_pitfalls": [
+      "Regex changes that break compatibility with valid but rare URI forms.",
+      "Assuming that regex validation alone is sufficient for security—additional checks may be needed."
+    ]
+  },
+  "knowledge_packet": {
+    "file_overview": "oauthlib/uri_validate.py defines regexes for URI validation, closely following RFC3986. The IPv6address regex is used as part of the host component in URI validation. The is_absolute_uri function uses these regexes to validate redirect URIs in OAuth2 flows.",
+    "ipv6address_regex": "The current regex is: r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\". This is overly permissive and does not strictly enforce the structure of valid IPv6 addresses as per RFC3986.",
+    "usage_flow": [
+      "is_absolute_uri is called to validate redirect_uri in OAuth2 flows (see oauthlib/oauth2/rfc6749/grant_types/base.py).",
+      "If is_absolute_uri returns True for a malicious or malformed URI, the redirect_uri may be accepted and used in a redirect, leading to CWE-601 (Open Redirect)."
+    ],
+    "vulnerability_mechanism": "The permissive IPv6address regex may allow malformed host components (e.g., [::evil.com]) to pass as valid. This can allow an attacker to craft a redirect_uri that appears to be a valid IP literal but is actually interpreted by browsers as a domain, enabling open redirect attacks."
+  },
+  "failure_insights": {}
+}
+```
+2026-01-16 21:38:10,100 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 21:38:22,798 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 21:38:22,798 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "PatchAgent",
+  "message": "In oauthlib/uri_validate.py, replace the current IPv6address regex (r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\") with a strict RFC3986-compliant regex. Use the following pattern, which matches all valid IPv6 address forms:\n\nIPv6address = r\"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}|:(?::[A-Fa-f0-9]{1,4}){1,7}|::\"\n\nMake this replacement and ensure the rest of the file remains unchanged."
+}
+2026-01-16 21:38:22,799 - src.agents.base - INFO - PatchAgent - LLM call prompt (1215 chars):
+## Message
+In oauthlib/uri_validate.py, replace the current IPv6address regex (r"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+") with a strict RFC3986-compliant regex. Use the following pattern, which matches all valid IPv6 address forms:
+
+IPv6address = r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}|:(?::[A-Fa-f0-9]{1,4}){1,7}|::"
+
+Make this replacement and ensure the rest of the file remains unchanged.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2022-36087",
+  "file_path": "oauthlib/uri_validate.py",
+  "vulnerable_code": "#   IPv6address\nIPv6address = r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\"",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2022-36087",
+  "cwe_id": [
+    "CWE-601"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "oauthlib/uri_validate.py",
+      "start_line": 68,
+      "end_line": 69
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 21:38:22,834 - src.agents.base - DEBUG - PatchAgent starting agent run (max_turns=1000000)
+2026-01-16 21:38:22,834 - src.agents.base - DEBUG - PatchAgent - System prompt (1430 chars):
+You are a Security Patch Developer responsible for implementing vulnerability fixes.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear, concise feedback about the implementation.
+
+## Role
+You receive high-level guidance describing WHAT to fix, not HOW. You must implement the fix with correct, complete code.
+
+## Rules
+
+1. **ONLY edit the vulnerable file(s)**: You may ONLY modify files explicitly listed in the vulnerability location. Do NOT edit any other files.
+2. **Complete Code Only**: Every variable, function, regex pattern, or constant you reference MUST be defined
+3. **No Placeholders**: Never use placeholder names like `enhanced_pattern`, `new_validator`, `helper_function` without implementing them
+4. **No Undefined References**: If you add `foo(x)`, the function `foo` must exist or you must define it
+5. **Verify Before Edit**: After reading the file, mentally trace your new code to ensure all symbols resolve
+6. **Rigor**: Be thorough, defensive and rigorous in your implementation. If you spot any issues the planner did not account for, fix them and report back in your patch summary.
+
+## Guidelines
+- Minimal changes only; preserve behavior.
+- Use ReadFile before EditCode.
+- Ensure every referenced symbol is defined.
+
+## Output Format
+Return a JSON summary with patch_applied and a short change description.
+Be precise and careful. Incorrect patches waste verification cycles.
+2026-01-16 21:38:23,980 - src.agents.base - INFO - PatchAgent executing tool: ReadFile
+2026-01-16 21:38:23,980 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "start_line": 68,
+  "end_line": 69
+}
+2026-01-16 21:38:24,165 - src.agents.base - INFO - Tool ReadFile: ✓
+2026-01-16 21:38:32,809 - src.agents.base - INFO - PatchAgent executing tool: EditCode
+2026-01-16 21:38:32,810 - src.agents.base - INFO - Tool arguments:
+{
+  "file_path": "oauthlib/uri_validate.py",
+  "old_code": "#   IPv6address\nIPv6address = r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\"",
+  "new_code": "#   IPv6address\nIPv6address = r\"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}|:(?::[A-Fa-f0-9]{1,4}){1,7}|::\"",
+  "fuzzy_match": true,
+  "skip_validation": false
+}
+2026-01-16 21:38:32,962 - src.tools.edit_code - INFO - EditCodeTool: Writing 6476 chars to oauthlib/uri_validate.py (match_type=exact)
+2026-01-16 21:38:33,105 - src.agents.base - INFO - Tool EditCode: ✓
+2026-01-16 21:38:34,455 - src.agents.base - INFO - PatchAgent - LLM response (240 chars):
+{
+  "patch_applied": true,
+  "change_description": "Replaced the old IPv6address regex with a strict RFC3986-compliant regex pattern as specified, ensuring all valid IPv6 address forms are matched. No other changes were made to the file."
+}
+2026-01-16 21:38:34,457 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 21:38:35,835 - src.agents.base - INFO - CoordinatorAgent executing tool: AskAgent
+2026-01-16 21:38:35,836 - src.agents.base - INFO - Tool arguments:
+{
+  "agent_name": "VerificationAgent",
+  "message": "Run the PoC and regression tests to verify that the new strict IPv6address regex in oauthlib/uri_validate.py fixes the open redirect vulnerability and does not break valid URI handling."
+}
+2026-01-16 21:38:35,836 - src.agents.base - INFO - VerificationAgent - LLM call prompt (696 chars):
+## Message
+Run the PoC and regression tests to verify that the new strict IPv6address regex in oauthlib/uri_validate.py fixes the open redirect vulnerability and does not break valid URI handling.
+
+## Context
+```json
+{
+  "sample_id": "CVE-2022-36087",
+  "file_path": "oauthlib/uri_validate.py",
+  "vulnerable_code": "#   IPv6address\nIPv6address = r\"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+\"",
+  "problem_statement": "",
+  "programming_language": "Python",
+  "cve_id": "CVE-2022-36087",
+  "cwe_id": [
+    "CWE-601"
+  ],
+  "vulnerability_locations": [
+    {
+      "file_path": "oauthlib/uri_validate.py",
+      "start_line": 68,
+      "end_line": 69
+    }
+  ],
+  "test_paths": [],
+  "poc_test": null
+}
+```
+2026-01-16 21:38:35,870 - src.agents.base - DEBUG - VerificationAgent starting agent run (max_turns=1000000)
+2026-01-16 21:38:35,870 - src.agents.base - DEBUG - VerificationAgent - System prompt (3831 chars):
+You are a Security Verification Engineer responsible for validating vulnerability patches.
+
+**IMPORTANT**: When invoked via AskAgent, focus on your task and provide clear test results and feedback.
+
+## Role
+
+After a patch is applied, you verify it using PatchEval's validation scripts:
+1. Run the PoC (Proof of Concept) test to verify the vulnerability is fixed
+2. Run the unit test suite (if present) to verify no regressions were introduced
+3. Produce structured feedback for the Planner if the patch fails
+
+## Tools
+
+### RunTest
+Runs PatchEval validation scripts in sequence:
+1. **prepare.sh** - Resets the repository to a clean state
+2. **fix-run.sh** - Executes the PoC to verify the vulnerability is patched
+3. **unit_test.sh** - (if present) Runs unit tests for functional correctness
+
+Parameters:
+- `run_prepare`: Whether to run prepare.sh first (default: true)
+- `timeout`: Timeout in seconds for each script (default: 120)
+ - `include_paths`: Optional list of file paths to limit the diff used to build /workspace/fix.patch. Pass the files you edited (e.g., from EditCode).
+
+The tool automatically:
+- Extracts the git diff from your applied changes
+- Writes it to /workspace/fix.patch
+- Runs the validation scripts
+- Returns the raw stdout/stderr output
+
+## Test Output Rules
+
+**YOU must read the stdout/stderr output to determine if tests pass or fail.**
+
+The RunTest tool returns raw output - it does NOT tell you if tests passed. You must analyze:
+
+### For PoC (fix-run.sh):
+- **PASS indicators**: "test passed", "vulnerability fixed", "OK", exit code 0 with no errors
+- **FAIL indicators**: tracebacks, exceptions, "FAILED", "AssertionError", "vulnerability still present"
+
+### For Unit Tests (unit_test.sh):
+- **PASS indicators**: "OK", "passed", "0 failures", all tests green
+- **FAIL indicators**: "FAILED", "ERROR", assertion failures, exceptions, non-zero failure count
+
+### Exit Codes:
+- Exit code 0 usually means success, but ALWAYS verify by reading the actual output
+- Exit code non-zero usually means failure, but check the output for details
+
+## Workflow
+
+1. **Call RunTest**: Simply call the RunTest tool - it handles setup automatically
+2. **READ THE OUTPUT CAREFULLY**: The tool returns raw stdout/stderr - analyze it to determine:
+   - Did the PoC test pass? (vulnerability fixed?)
+   - Did unit tests pass? (no regressions?)
+3. **Provide Feedback**: Based on YOUR analysis of the output, provide actionable feedback
+ 4. When calling RunTest, if `edited_files` are provided in context, pass them via `include_paths` to restrict the patch to only those files.
+
+## Output Format
+
+After running the test and READING THE OUTPUT, provide your analysis:
+
+```json
+{
+    "poc_result": {
+        "passed": true/false, true if and only if the test conclusively shows the vulnerability is fixed
+        "vulnerability_fixed": true/false,
+        "analysis": "What you observed in the fix-run.sh output that led to this conclusion"
+    },
+    "regression_result": {
+        "passed": true/false, true if and only if all unit tests passed
+        "tests_present": true/false,
+        "analysis": "What you observed in the unit_test.sh output (if present)"
+    },
+    "overall_verdict": "PASS" | "FAIL_POC" | "FAIL_REGRESSION",
+    "feedback_for_planner": {
+        "issues": ["List of specific issues from the test output"],
+        "suggestions": ["Concrete suggestions for fixing the issues"],
+        "suspected_cause": "Analysis of the root cause of failures",
+        "output_excerpt": "Relevant portion of test output showing the failure"
+    }
+}
+```
+
+Be thorough in your analysis. Quote specific lines from the output to support your conclusions. If a test fails, you must mark it as such, there is no room for interpretation in that case. If either poc or unit tests are missing, you may mark them as passed
+2026-01-16 21:38:36,842 - src.agents.base - INFO - VerificationAgent executing tool: RunTest
+2026-01-16 21:38:36,843 - src.agents.base - INFO - Tool arguments:
+{
+  "run_prepare": true,
+  "timeout": 120,
+  "include_paths": [
+    "oauthlib/uri_validate.py"
+  ],
+  "run_unittest": true
+}
+2026-01-16 21:38:37,171 - src.tools.run_test - INFO - Extracted 1 file paths from /workspace/test.patch: ['tests/test_uri_validate.py']
+2026-01-16 21:38:37,171 - src.tools.run_test - INFO - Generating git diff for fix.patch
+2026-01-16 21:38:37,171 - src.tools.run_test - INFO -   include_paths: ['oauthlib/uri_validate.py']
+2026-01-16 21:38:37,171 - src.tools.run_test - INFO -   exclude_paths (from test.patch): ['tests/test_uri_validate.py']
+2026-01-16 21:38:37,171 - src.tools.run_test - INFO -   git diff command: git diff HEAD -- 'oauthlib/uri_validate.py' ':(exclude)tests/test_uri_validate.py'
+2026-01-16 21:38:37,311 - src.tools.run_test - INFO -   Generated patch: 908 bytes, 13 lines
+2026-01-16 21:38:37,311 - src.tools.run_test - INFO -   Patch content:
+diff --git a/oauthlib/uri_validate.py b/oauthlib/uri_validate.py
+index 8a6d9c2..d438086 100644
+--- a/oauthlib/uri_validate.py
++++ b/oauthlib/uri_validate.py
+@@ -66,7 +66,7 @@ IPv4address = r"%(dec_octet)s \. %(dec_octet)s \. %(dec_octet)s \. %(dec_octet)s
+ )
+ 
+ #   IPv6address
+-IPv6address = r"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+"
++IPv6address = r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}|:(?::[A-Fa-f0-9]{1,4}){1,7}|::"
+ 
+ #   IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+ IPvFuture = r"v %(HEXDIG)s+ \. (?: %(unreserved)s | %(sub_delims)s | : )+" % locals()
+
+2026-01-16 21:38:37,400 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:38:37,970 - src.tools.run_test - INFO - Running fix-run.sh for PoC validation...
+2026-01-16 21:38:38,083 - src.tools.run_test - INFO - Patch being tested:
+diff --git a/oauthlib/uri_validate.py b/oauthlib/uri_validate.py
+index 8a6d9c2..d438086 100644
+--- a/oauthlib/uri_validate.py
++++ b/oauthlib/uri_validate.py
+@@ -66,7 +66,7 @@ IPv4address = r"%(dec_octet)s \. %(dec_octet)s \. %(dec_octet)s \. %(dec_octet)s
+ )
+ 
+ #   IPv6address
+-IPv6address = r"([A-Fa-f0-9:]+:+)+[A-Fa-f0-9]+"
++IPv6address = r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}|:(?::[A-Fa-f0-9]{1,4}){1,7}|::"
+ 
+ #   IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+ IPvFuture = r"v %(HEXDIG)s+ \. (?: %(unreserved)s | %(sub_delims)s | : )+" % locals()
+
+
+2026-01-16 21:38:38,862 - src.tools.run_test - INFO - fix-run.sh completed with exit code 0
+2026-01-16 21:38:38,862 - src.tools.run_test - INFO - fix-run.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.12.11, pytest-8.4.0, pluggy-1.6.0
+rootdir: /workspace/oauthlib
+plugins: cov-6.1.1
+collected 11 items
+
+tests/test_uri_validate.py ......ss...                                   [100%]
+
+========================= 9 passed, 2 skipped in 0.04s =========================
+
+2026-01-16 21:38:38,954 - src.tools.run_test - INFO - Running prepare.sh to reset repository...
+2026-01-16 21:38:39,517 - src.tools.run_test - INFO - Running unit_test.sh for regression testing...
+2026-01-16 21:38:42,276 - src.tools.run_test - INFO - unit_test.sh completed with exit code 0
+2026-01-16 21:38:42,276 - src.tools.run_test - INFO - unit_test.sh output:
+============================= test session starts ==============================
+platform linux -- Python 3.12.11, pytest-8.4.0, pluggy-1.6.0 -- /workspace/PoC_env/CVE-2022-36087/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/oauthlib
+plugins: cov-6.1.1
+collecting ... collected 644 items / 1 deselected / 643 selected
+
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_check_request_token PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_check_verifier PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_valid_request PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_validate_client_key PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_validate_request_token PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_validate_signature PASSED [  0%]
+tests/oauth1/rfc5849/endpoints/test_access_token.py::AccessTokenEndpointTest::test_validate_verifier PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_authorization.py::AuthorizationEndpointTest::test_create_authorization_response PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_authorization.py::AuthorizationEndpointTest::test_create_authorization_response_oob PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_authorization.py::AuthorizationEndpointTest::test_get_realms_and_credentials PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_authorization.py::AuthorizationEndpointTest::test_verify_realms PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_authorization.py::AuthorizationEndpointTest::test_verify_token PASSED [  1%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_case_insensitive_headers PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_client_key_check PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_duplicate_params PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_enforce_ssl PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_expired_timestamp PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_invalid_version PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_mandated_params PASSED [  2%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_missing_parameters PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_multiple_source_params PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_noncecheck PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_oauth_timestamp PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_oauth_version PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_signature_method_validation PASSED [  3%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_signature_methods PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_base.py::BaseEndpointTest::test_ssl_enforcement PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_base.py::SignatureVerificationTest::test_hmac_signature PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_base.py::SignatureVerificationTest::test_plaintext_signature PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_base.py::SignatureVerificationTest::test_rsa_signature PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_base.py::SignatureVerificationTest::test_signature_too_short PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_check_realms PASSED [  4%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_check_redirect_uri PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_uri_provided_realm PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_valid_request PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_validate_client_key PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_validate_realms PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_validate_redirect_uri PASSED [  5%]
+tests/oauth1/rfc5849/endpoints/test_request_token.py::RequestTokenEndpointTest::test_validate_signature PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_check_access_token PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_missing_parameters PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_valid_request PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_validate_access_token PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_validate_client_key PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_validate_realms PASSED [  6%]
+tests/oauth1/rfc5849/endpoints/test_resource.py::ResourceEndpointTest::test_validate_signature PASSED [  7%]
+tests/oauth1/rfc5849/endpoints/test_signature_only.py::SignatureOnlyEndpointTest::test_missing_parameters PASSED [  7%]
+tests/oauth1/rfc5849/endpoints/test_signature_only.py::SignatureOnlyEndpointTest::test_valid_request PASSED [  7%]
+tests/oauth1/rfc5849/endpoints/test_signature_only.py::SignatureOnlyEndpointTest::test_validate_client_key PASSED [  7%]
+tests/oauth1/rfc5849/endpoints/test_signature_only.py::SignatureOnlyEndpointTest::test_validate_signature PASSED [  7%]
+tests/oauth1/rfc5849/test_client.py::ClientRealmTests::test_client_no_realm PASSED [  7%]
+tests/oauth1/rfc5849/test_client.py::ClientRealmTests::test_client_realm_sign_with_additional_realm PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientRealmTests::test_client_realm_sign_with_default_realm PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_convert_to_unicode_resource_owner PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_decoding PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_give_explicit_nonce PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_give_explicit_timestamp PASSED [  8%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_hmac_sha1 PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_hmac_sha256 PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::ClientConstructorTests::test_rsa PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_hmac_sha1_method PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_hmac_sha256_method PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_invalid_method PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_plaintext_method PASSED [  9%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_register_method PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_rsa_method PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SignatureMethodTest::test_rsa_no_key PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SignatureTypeTest::test_invalid_signature_type PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SignatureTypeTest::test_params_in_body PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SignatureTypeTest::test_params_in_query PASSED [ 10%]
+tests/oauth1/rfc5849/test_client.py::SigningTest::test_case_insensitive_headers PASSED [ 11%]
+tests/oauth1/rfc5849/test_client.py::SigningTest::test_sign_body PASSED  [ 11%]
+tests/oauth1/rfc5849/test_client.py::SigningTest::test_sign_get_with_body PASSED [ 11%]
+tests/oauth1/rfc5849/test_client.py::SigningTest::test_sign_no_body PASSED [ 11%]
+tests/oauth1/rfc5849/test_client.py::SigningTest::test_sign_unicode PASSED [ 11%]
+tests/oauth1/rfc5849/test_parameters.py::ParameterTests::test_append_params PASSED [ 11%]
+tests/oauth1/rfc5849/test_parameters.py::ParameterTests::test_prepare_form_encoded_body PASSED [ 11%]
+tests/oauth1/rfc5849/test_parameters.py::ParameterTests::test_prepare_headers PASSED [ 12%]
+tests/oauth1/rfc5849/test_parameters.py::ParameterTests::test_prepare_headers_ignore_data PASSED [ 12%]
+tests/oauth1/rfc5849/test_parameters.py::ParameterTests::test_prepare_request_uri_query PASSED [ 12%]
+tests/oauth1/rfc5849/test_request_validator.py::RequestValidatorTests::test_check_length PASSED [ 12%]
+tests/oauth1/rfc5849/test_request_validator.py::RequestValidatorTests::test_check_realms PASSED [ 12%]
+tests/oauth1/rfc5849/test_request_validator.py::RequestValidatorTests::test_not_implemented PASSED [ 12%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_base_string_uri PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_collect_parameters PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_hmac_false_positives PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_normalize_parameters PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_plaintext_false_positives PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_rsa_false_positives PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_rsa_jwt_algorithm_cache PASSED [ 13%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_hmac_sha1_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_hmac_sha256_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_hmac_sha512_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_plaintext_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_rsa_sha1_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_rsa_sha256_with_client PASSED [ 14%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_sign_rsa_sha512_with_client PASSED [ 15%]
+tests/oauth1/rfc5849/test_signatures.py::SignatureTests::test_signature_base_string PASSED [ 15%]
+tests/oauth1/rfc5849/test_utils.py::UtilsTests::test_escape PASSED       [ 15%]
+tests/oauth1/rfc5849/test_utils.py::UtilsTests::test_filter_oauth_params PASSED [ 15%]
+tests/oauth1/rfc5849/test_utils.py::UtilsTests::test_filter_params PASSED [ 15%]
+tests/oauth1/rfc5849/test_utils.py::UtilsTests::test_parse_authorization_header PASSED [ 15%]
+tests/oauth1/rfc5849/test_utils.py::UtilsTests::test_unescape PASSED     [ 16%]
+tests/oauth2/rfc6749/clients/test_backend_application.py::BackendApplicationClientTest::test_parse_token_response PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_backend_application.py::BackendApplicationClientTest::test_request_body PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_add_bearer_token PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_add_mac_token PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_create_code_challenge_plain PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_create_code_challenge_s256 PASSED [ 16%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_create_code_verifier_max_length PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_create_code_verifier_min_length PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_parse_token_response_invalid_expires_at PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_prepare_authorization_request PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_prepare_refresh_token_request PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_prepare_token_request PASSED [ 17%]
+tests/oauth2/rfc6749/clients/test_base.py::ClientTest::test_revocation_request PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_legacy_application.py::LegacyApplicationClientTest::test_parse_token_response PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_legacy_application.py::LegacyApplicationClientTest::test_prepare_request_body PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_legacy_application.py::LegacyApplicationClientTest::test_request_body PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_mobile_application.py::MobileApplicationClientTest::test_implicit_token_uri PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_mobile_application.py::MobileApplicationClientTest::test_parse_token_response PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_mobile_application.py::MobileApplicationClientTest::test_populate_attributes PASSED [ 18%]
+tests/oauth2/rfc6749/clients/test_service_application.py::ServiceApplicationClientTest::test_parse_token_response PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_service_application.py::ServiceApplicationClientTest::test_request_body PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_service_application.py::ServiceApplicationClientTest::test_request_body_no_initial_private_key PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_auth_grant_uri PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_parse_grant_uri_response PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_parse_token_response PASSED [ 19%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_populate_attributes PASSED [ 20%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_prepare_authorization_requeset PASSED [ 20%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_prepare_request_body PASSED [ 20%]
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_request_body PASSED [ 20%]
+tests/oauth2/rfc6749/endpoints/test_base_endpoint.py::BaseEndpointTest::test_default_config PASSED [ 20%]
+tests/oauth2/rfc6749/endpoints/test_base_endpoint.py::BaseEndpointTest::test_error_catching PASSED [ 20%]
+tests/oauth2/rfc6749/endpoints/test_base_endpoint.py::BaseEndpointTest::test_unavailability PASSED [ 20%]
+tests/oauth2/rfc6749/endpoints/test_base_endpoint.py::BaseEndpointTest::test_wrapper PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_basicauth_backend PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_basicauth_introspect PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_basicauth_legacy PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_basicauth_revoke PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_basicauth_web PASSED [ 21%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_client_id_authentication PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_client_authentication.py::ClientAuthenticationTest::test_custom_authentication PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_credentials_preservation.py::PreservationTest::test_default_uri PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_credentials_preservation.py::PreservationTest::test_default_uri_in_token PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_credentials_preservation.py::PreservationTest::test_invalid_redirect_uri PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_credentials_preservation.py::PreservationTest::test_redirect_uri_preservation PASSED [ 22%]
+tests/oauth2/rfc6749/endpoints/test_credentials_preservation.py::PreservationTest::test_state_preservation PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_access_denied PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_access_denied_no_default_redirecturi PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_empty_parameter PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_client PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_client_id PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_default_redirect_uri PASSED [ 23%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_grant PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_post_request PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_redirect_uri PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_request PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_request_duplicate_params PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_request_method PASSED [ 24%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_request_missing_response_type PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_invalid_scope PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_mismatching_redirect_uri PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_missing_client_id PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_missing_redirect_uri PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_server_error PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_temporarily_unavailable PASSED [ 25%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_unauthorized_client PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_unsupported_grant_type PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_error_responses.py::ErrorResponseTest::test_unsupported_response_type PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_extra_credentials.py::ExtraCredentialsTest::test_post_authorization_request PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_extra_credentials.py::ExtraCredentialsTest::test_token_request PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_bad_post_request PASSED [ 26%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_invalid_request_method PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_claims PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_claims_spoof_active PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_client_authentication_failed PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_false PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_nohint PASSED [ 27%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_public_client_authentication PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_token_public_client_authentication_failed PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_introspect_endpoint.py::IntrospectEndpointTest::test_introspect_unsupported_token PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_create_metadata_response PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_mandatory_fields PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_metadata_validate_issuer PASSED [ 28%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_openid_oauth2_preconfigured PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_server_metadata PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_token_endpoint PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_metadata.py::MetadataEndpointTest::test_token_endpoint_overridden PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_resource_owner_association.py::ResourceOwnerAssociationTest::test_backend_application PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_resource_owner_association.py::ResourceOwnerAssociationTest::test_legacy_application PASSED [ 29%]
+tests/oauth2/rfc6749/endpoints/test_resource_owner_association.py::ResourceOwnerAssociationTest::test_mobile_application PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_resource_owner_association.py::ResourceOwnerAssociationTest::test_web_application PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_bad_post_request PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_invalid_request_method PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_token PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_token_client_authentication_failed PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_token_public_client_authentication PASSED [ 30%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_token_public_client_authentication_failed PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_unsupported_token PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_revocation_endpoint.py::RevocationEndpointTest::test_revoke_with_callback PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_scope_handling.py::TestScopeHandling::test_invalid_scope PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_scope_handling.py::TestScopeHandling::test_scope_changed PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_scope_handling.py::TestScopeHandling::test_scope_extraction PASSED [ 31%]
+tests/oauth2/rfc6749/endpoints/test_scope_handling.py::TestScopeHandling::test_scope_preservation PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authenticate_client PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authenticate_client_id PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authentication_required PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_client_id_missing PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_code_modifier_called PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_plain PASSED [ 32%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_s256 PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant_no_scopes PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant_state PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_response PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers PASSED [ 33%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_insecure_origin PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_invalid_origin PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_no_origin PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_token_response PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_token_response_without_refresh_token PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_custom_auth_validators PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_custom_token_validators PASSED [ 34%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_hybrid_token_save PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_grant PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_grant_type PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_redirect_uri PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_request PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_request_duplicates PASSED [ 35%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_challenge_missing PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_default_method PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_missing_challenge_valid PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_valid_challenge_missing PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_invalid_challenge_valid_method_valid PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_missing PASSED [ 36%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_valid PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_missing PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_valid PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_wrong PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_verifier_missing PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_verifier_valid_challenge_valid_method_missing PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_wrong_method PASSED [ 37%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_plain PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_s256 PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_client_credentials.py::ClientCredentialsGrantTest::test_create_token_response PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_client_credentials.py::ClientCredentialsGrantTest::test_custom_auth_validators_unsupported PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_client_credentials.py::ClientCredentialsGrantTest::test_custom_token_validators PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_client_credentials.py::ClientCredentialsGrantTest::test_error_response PASSED [ 38%]
+tests/oauth2/rfc6749/grant_types/test_client_credentials.py::ClientCredentialsGrantTest::test_validate_token_response PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_implicit.py::ImplicitGrantTest::test_create_token_response PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_implicit.py::ImplicitGrantTest::test_custom_validators PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_implicit.py::ImplicitGrantTest::test_error_response PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_authenticate_client_id PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_authentication_required PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers PASSED [ 39%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_insecure_origin PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_invalid_origin PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_no_origin PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_inherit_scope PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_response PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_within_original_scope PASSED [ 40%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_custom_auth_validators_unsupported PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_custom_token_validators PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_client PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_grant_type PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_refresh_token PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_scope PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_scope_original_scopes_empty PASSED [ 41%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_token PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_valid_token_request PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_client_id_missing PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_create_token_response PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_create_token_response_without_refresh_token PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_custom_auth_validators_unsupported PASSED [ 42%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_custom_token_validators PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_error_response PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_invalid_grant_type PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_invalid_request_duplicates PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_invalid_request_missing_params PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_invalid_user PASSED [ 43%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_scopes PASSED [ 44%]
+tests/oauth2/rfc6749/grant_types/test_resource_owner_password.py::ResourceOwnerPasswordCredentialsGrantTest::test_valid_token_request PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_custom_json_error PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_grant_response PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_implicit_token_response PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_json_token_notype PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_json_token_response PASSED [ 44%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_prepare_grant_uri PASSED [ 45%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_prepare_token_request PASSED [ 45%]
+tests/oauth2/rfc6749/test_parameters.py::ParameterTests::test_url_encoded_token_response PASSED [ 45%]
+tests/oauth2/rfc6749/test_request_validator.py::RequestValidatorTest::test_method_contracts PASSED [ 45%]
+tests/oauth2/rfc6749/test_server.py::AuthorizationEndpointTest::test_authorization_grant PASSED [ 45%]
+tests/oauth2/rfc6749/test_server.py::AuthorizationEndpointTest::test_implicit_grant PASSED [ 45%]
+tests/oauth2/rfc6749/test_server.py::AuthorizationEndpointTest::test_invalid_type PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::AuthorizationEndpointTest::test_missing_type PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::AuthorizationEndpointTest::test_none_grant PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::TokenEndpointTest::test_authorization_grant PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::TokenEndpointTest::test_client_grant PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::TokenEndpointTest::test_invalid_type PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::TokenEndpointTest::test_missing_type PASSED [ 46%]
+tests/oauth2/rfc6749/test_server.py::TokenEndpointTest::test_password_grant PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_authorization_grant PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_client_grant PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_invalid_type PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_missing_type PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_password_grant PASSED [ 47%]
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_scopes_and_user_id_stored_in_access_token PASSED [ 48%]
+tests/oauth2/rfc6749/test_server.py::ResourceEndpointTest::test_defaults PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_estimate_type PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_estimate_type_with_fake_header_returns_type_0 PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_fake_bearer_is_not_validated PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_header_with_multispaces_is_validated PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_lowercase_bearer_is_validated PASSED [ 48%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_prepare_bearer_request PASSED [ 49%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_prepare_mac_header PASSED [ 49%]
+tests/oauth2/rfc6749/test_tokens.py::TokenTest::test_valid_bearer_is_validated PASSED [ 49%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_escape PASSED       [ 49%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_generate_age PASSED [ 49%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_host_from_uri PASSED [ 49%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_is_secure_transport PASSED [ 50%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_list_to_scope PASSED [ 50%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_params_from_uri PASSED [ 50%]
+tests/oauth2/rfc6749/test_utils.py::UtilsTests::test_scope_to_list PASSED [ 50%]
+tests/oauth2/rfc8628/clients/test_device.py::DeviceClientTest::test_request_body PASSED [ 50%]
+tests/oauth2/rfc8628/clients/test_device.py::DeviceClientTest::test_request_uri PASSED [ 50%]
+tests/openid/connect/core/endpoints/test_claims_handling.py::TestClaimsHandling::test_claims_stored_on_code_creation PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_claims_handling.py::TestClaimsHandling::test_invalid_claims PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_openid_connect_params_handling.py::OpenIDConnectEndpointTest::test_authorization_endpoint_handles_prompt PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_openid_connect_params_handling.py::OpenIDConnectEndpointTest::test_oidc_params_preservation PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_openid_connect_params_handling.py::OpenIDConnectEndpointTest::test_prompt_none_exclusiveness PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_json_response PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_jwt_response PASSED [ 51%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_no_auth PASSED [ 52%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_token_expired PASSED [ 52%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_token_no_openid_scope PASSED [ 52%]
+tests/openid/connect/core/endpoints/test_userinfo_endpoint.py::UserInfoEndpointTest::test_userinfo_wrong_auth PASSED [ 52%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authenticate_client PASSED [ 52%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authenticate_client_id PASSED [ 52%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_authentication_required PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_client_id_missing PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_code_modifier_called PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_plain PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_s256 PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant_no_scopes PASSED [ 53%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_grant_state PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_authorization_response PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_insecure_origin PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_invalid_origin PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_cors_headers_no_origin PASSED [ 54%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_token_response PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_create_token_response_without_refresh_token PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_custom_auth_validators PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_custom_token_validators PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_hybrid_token_save PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_grant PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_grant_type PASSED [ 55%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_redirect_uri PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_request PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_invalid_request_duplicates PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_challenge_missing PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_default_method PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_missing_challenge_valid PASSED [ 56%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_valid_challenge_missing PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_invalid_challenge_valid_method_valid PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_missing PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_valid PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_missing PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_valid PASSED [ 57%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_wrong PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_verifier_missing PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_verifier_valid_challenge_valid_method_missing PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_pkce_wrong_method PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_plain PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_s256 PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_authenticate_client PASSED [ 58%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_authenticate_client_id PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_authentication_required PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_client_id_missing PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_code_modifier_called PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_correct_code_challenge_method_plain PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_correct_code_challenge_method_s256 PASSED [ 59%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_authorization_grant PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_authorization_grant_no_scopes PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_authorization_grant_state PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_authorization_response PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_cors_headers PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_cors_headers_insecure_origin PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_cors_headers_invalid_origin PASSED [ 60%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_cors_headers_no_origin PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_token_response PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_create_token_response_without_refresh_token PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_custom_auth_validators PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_custom_token_validators PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_hybrid_token_save PASSED [ 61%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_invalid_grant PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_invalid_grant_type PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_invalid_redirect_uri PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_invalid_request PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_invalid_request_duplicates PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_challenge_missing PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_default_method PASSED [ 62%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_optional_verifier_missing_challenge_valid PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_optional_verifier_valid_challenge_missing PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_invalid_challenge_valid_method_valid PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_missing_challenge_missing PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_missing_challenge_valid PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_valid_challenge_missing PASSED [ 63%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_valid_challenge_valid_method_valid PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_required_verifier_valid_challenge_valid_method_wrong PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_verifier_missing PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_verifier_valid_challenge_valid_method_missing PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_pkce_wrong_method PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_wrong_code_challenge_method_plain PASSED [ 64%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeInterferenceTest::test_wrong_code_challenge_method_s256 PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeTest::test_authorization PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeTest::test_create_token_response PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeTest::test_no_prompt_authorization PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeTest::test_none_multi_prompt PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_authorization_code.py::OpenIDAuthCodeTest::test_optional_nonce PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_finalize_id_token PASSED [ 65%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_finalize_id_token_with_at_hash PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_finalize_id_token_with_c_and_at_hash PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_finalize_id_token_with_c_hash PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_finalize_id_token_with_nonce PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_get_id_token PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_get_id_token_no_openid PASSED [ 66%]
+tests/openid/connect/core/grant_types/test_base.py::IDTokenTest::test_id_token_hash PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::ImplicitTokenGrantDispatcherTest::test_create_authorization_response_oauth PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::ImplicitTokenGrantDispatcherTest::test_create_authorization_response_openid PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::ImplicitTokenGrantDispatcherTest::test_validate_authorization_request_oauth PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::ImplicitTokenGrantDispatcherTest::test_validate_authorization_request_openid PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::AuthTokenGrantDispatcherOpenIdTest::test_create_token_response_openid PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::AuthTokenGrantDispatcherOpenIdWithoutCodeTest::test_create_token_response_openid_without_code PASSED [ 67%]
+tests/openid/connect/core/grant_types/test_dispatchers.py::AuthTokenGrantDispatcherOAuthTest::test_create_token_response_oauth PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_authenticate_client PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_authenticate_client_id PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_authentication_required PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_client_id_missing PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_code_modifier_called PASSED [ 68%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_plain PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_correct_code_challenge_method_s256 PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_authorization_grant PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_authorization_grant_no_scopes PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_authorization_grant_state PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_authorization_response PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_cors_headers PASSED [ 69%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_cors_headers_insecure_origin PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_cors_headers_invalid_origin PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_cors_headers_no_origin PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_token_response PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_create_token_response_without_refresh_token PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_custom_auth_validators PASSED [ 70%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_custom_token_validators PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_hybrid_token_save PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_invalid_grant PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_invalid_grant_type PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_invalid_redirect_uri PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_invalid_request PASSED [ 71%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_invalid_request_duplicates PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_challenge_missing PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_default_method PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_missing_challenge_valid PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_optional_verifier_valid_challenge_missing PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_invalid_challenge_valid_method_valid PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_missing PASSED [ 72%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_missing_challenge_valid PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_missing PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_valid PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_required_verifier_valid_challenge_valid_method_wrong PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_verifier_missing PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_verifier_valid_challenge_valid_method_missing PASSED [ 73%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_pkce_wrong_method PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_plain PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::AuthorizationCodeGrantTest::test_wrong_code_challenge_method_s256 PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDAuthCodeTest::test_authorization PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDAuthCodeTest::test_create_token_response PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDAuthCodeTest::test_no_prompt_authorization PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDAuthCodeTest::test_none_multi_prompt PASSED [ 74%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDAuthCodeTest::test_optional_nonce PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_authenticate_client PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_authenticate_client_id PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_authentication_required PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_client_id_missing PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_code_modifier_called PASSED [ 75%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_correct_code_challenge_method_plain PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_correct_code_challenge_method_s256 PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_authorization_grant PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_authorization_grant_no_scopes PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_authorization_grant_state PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_authorization_response PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_cors_headers PASSED [ 76%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_cors_headers_insecure_origin PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_cors_headers_invalid_origin PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_cors_headers_no_origin PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_token_response PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_create_token_response_without_refresh_token PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_custom_auth_validators PASSED [ 77%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_custom_token_validators PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_hybrid_token_save PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_invalid_grant PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_invalid_grant_type PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_invalid_redirect_uri PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_invalid_request PASSED [ 78%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_invalid_request_duplicates PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_challenge_missing PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_default_method PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_optional_verifier_missing_challenge_valid PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_optional_verifier_valid_challenge_missing PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_invalid_challenge_valid_method_valid PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_missing_challenge_missing PASSED [ 79%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_missing_challenge_valid PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_valid_challenge_missing PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_valid_challenge_valid_method_valid PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_required_verifier_valid_challenge_valid_method_wrong PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_verifier_missing PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_verifier_valid_challenge_valid_method_missing PASSED [ 80%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_pkce_wrong_method PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_wrong_code_challenge_method_plain PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridInterferenceTest::test_wrong_code_challenge_method_s256 PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeTokenTest::test_authorization PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeTokenTest::test_create_token_response PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeTokenTest::test_no_prompt_authorization PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeTokenTest::test_none_multi_prompt PASSED [ 81%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeTokenTest::test_optional_nonce PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_authorization PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_create_token_response PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_id_token_contains_nonce PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_no_prompt_authorization PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_none_multi_prompt PASSED [ 82%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_optional_nonce PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTest::test_required_nonce PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_authorization PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_create_token_response PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_no_prompt_authorization PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_none_multi_prompt PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_optional_nonce PASSED [ 83%]
+tests/openid/connect/core/grant_types/test_hybrid.py::OpenIDHybridCodeIdTokenTokenTest::test_required_nonce PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::ImplicitGrantTest::test_create_token_response PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::ImplicitGrantTest::test_custom_validators PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::ImplicitGrantTest::test_error_response PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitInterferenceTest::test_create_token_response PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitInterferenceTest::test_custom_validators PASSED [ 84%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitInterferenceTest::test_error_response PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitTest::test_authorization PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitTest::test_no_prompt_authorization PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitTest::test_none_multi_prompt PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitTest::test_required_nonce PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitNoAccessTokenTest::test_authorization PASSED [ 85%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitNoAccessTokenTest::test_no_prompt_authorization PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitNoAccessTokenTest::test_none_multi_prompt PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_implicit.py::OpenIDImplicitNoAccessTokenTest::test_required_nonce PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_authenticate_client_id PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_authentication_required PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_insecure_origin PASSED [ 86%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_invalid_origin PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_cors_headers_no_origin PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_inherit_scope PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_response PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_create_token_within_original_scope PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_custom_auth_validators_unsupported PASSED [ 87%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_custom_token_validators PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_client PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_grant_type PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_refresh_token PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_scope PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_scope_original_scopes_empty PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_invalid_token PASSED [ 88%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::RefreshTokenGrantTest::test_valid_token_request PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_authenticate_client_id PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_authentication_required PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_cors_headers PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_cors_headers_insecure_origin PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_cors_headers_invalid_origin PASSED [ 89%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_cors_headers_no_origin PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_token_inherit_scope PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_token_response PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_create_token_within_original_scope PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_custom_auth_validators_unsupported PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_custom_token_validators PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_client PASSED [ 90%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_grant_type PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_refresh_token PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_scope PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_scope_original_scopes_empty PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_invalid_token PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenInterferenceTest::test_valid_token_request PASSED [ 91%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenTest::test_refresh_id_token PASSED [ 92%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenTest::test_refresh_id_token_false PASSED [ 92%]
+tests/openid/connect/core/grant_types/test_refresh_token.py::OpenIDRefreshTokenTest::test_refresh_token_without_openid_scope PASSED [ 92%]
+tests/openid/connect/core/test_request_validator.py::RequestValidatorTest::test_method_contracts PASSED [ 92%]
+tests/openid/connect/core/test_server.py::AuthorizationEndpointTest::test_authorization_grant PASSED [ 92%]
+tests/openid/connect/core/test_server.py::AuthorizationEndpointTest::test_implicit_grant PASSED [ 92%]
+tests/openid/connect/core/test_server.py::AuthorizationEndpointTest::test_invalid_type PASSED [ 93%]
+tests/openid/connect/core/test_server.py::AuthorizationEndpointTest::test_missing_type PASSED [ 93%]
+tests/openid/connect/core/test_server.py::AuthorizationEndpointTest::test_none_grant PASSED [ 93%]
+tests/openid/connect/core/test_server.py::TokenEndpointTest::test_authorization_grant PASSED [ 93%]
+tests/openid/connect/core/test_server.py::TokenEndpointTest::test_invalid_type PASSED [ 93%]
+tests/openid/connect/core/test_server.py::TokenEndpointTest::test_missing_type PASSED [ 93%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_create_token_callable_expires_in PASSED [ 93%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_create_token_calls_get_id_token PASSED [ 94%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_create_token_non_callable_expires_in PASSED [ 94%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_estimate_type PASSED [ 94%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_validate_request_token_from_headers PASSED [ 94%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_validate_request_token_from_headers_basic PASSED [ 94%]
+tests/openid/connect/core/test_tokens.py::JWTTokenTestCase::test_validate_token_from_request PASSED [ 94%]
+tests/test_common.py::EncodingTest::test_urldecode PASSED                [ 95%]
+tests/test_common.py::ParameterTest::test_add_params_to_uri PASSED       [ 95%]
+tests/test_common.py::ParameterTest::test_extract_invalid PASSED         [ 95%]
+tests/test_common.py::ParameterTest::test_extract_non_formencoded_string PASSED [ 95%]
+tests/test_common.py::ParameterTest::test_extract_params_blank_string PASSED [ 95%]
+tests/test_common.py::ParameterTest::test_extract_params_dict PASSED     [ 95%]
+tests/test_common.py::ParameterTest::test_extract_params_empty_list PASSED [ 95%]
+tests/test_common.py::ParameterTest::test_extract_params_formencoded PASSED [ 96%]
+tests/test_common.py::ParameterTest::test_extract_params_twotuple PASSED [ 96%]
+tests/test_common.py::GeneratorTest::test_generate_client_id PASSED      [ 96%]
+tests/test_common.py::GeneratorTest::test_generate_nonce PASSED          [ 96%]
+tests/test_common.py::GeneratorTest::test_generate_timestamp PASSED      [ 96%]
+tests/test_common.py::GeneratorTest::test_generate_token PASSED          [ 96%]
+tests/test_common.py::RequestTest::test_dict_body PASSED                 [ 97%]
+tests/test_common.py::RequestTest::test_empty_dict_body PASSED           [ 97%]
+tests/test_common.py::RequestTest::test_empty_list_body PASSED           [ 97%]
+tests/test_common.py::RequestTest::test_empty_string_body PASSED         [ 97%]
+tests/test_common.py::RequestTest::test_getattr_existing_attribute PASSED [ 97%]
+tests/test_common.py::RequestTest::test_getattr_raise_attribute_error PASSED [ 97%]
+tests/test_common.py::RequestTest::test_getattr_return_default PASSED    [ 97%]
+tests/test_common.py::RequestTest::test_headers_params PASSED            [ 98%]
+tests/test_common.py::RequestTest::test_list_body PASSED                 [ 98%]
+tests/test_common.py::RequestTest::test_non_formencoded_string_body PASSED [ 98%]
+tests/test_common.py::RequestTest::test_non_unicode_params PASSED        [ 98%]
+tests/test_common.py::RequestTest::test_none_body PASSED                 [ 98%]
+tests/test_common.py::RequestTest::test_param_free_sequence_body PASSED  [ 98%]
+tests/test_common.py::RequestTest::test_password_body PASSED             [ 99%]
+tests/test_common.py::RequestTest::test_sanitized_request_non_debug_mode PASSED [ 99%]
+tests/test_common.py::RequestTest::test_sanitizing_authorization_header PASSED [ 99%]
+tests/test_common.py::RequestTest::test_token_body PASSED                [ 99%]
+tests/test_common.py::CaseInsensitiveDictTest::test_basic PASSED         [ 99%]
+tests/test_common.py::CaseInsensitiveDictTest::test_update PASSED        [ 99%]
+tests/test_uri_validate.py::UriValidateTest::test_is_absolute_uri PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/oauth2/rfc6749/clients/test_web_application.py::WebApplicationClientTest::test_prepare_request_body
+  /workspace/oauthlib/oauthlib/oauth2/rfc6749/clients/web_application.py:163: DeprecationWarning: `client_id` has been deprecated in favor of `include_client_id`, a boolean value which will include the already configured `self.client_id`.
+    warnings.warn("`client_id` has been deprecated in favor of "
+
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_authorization_grant
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_authorization_grant
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_authorization_grant
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_client_grant
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_password_grant
+tests/oauth2/rfc6749/test_server.py::SignedTokenEndpointTest::test_scopes_and_user_id_stored_in_access_token
+  /workspace/oauthlib/oauthlib/common.py:203: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.datetime.utcnow()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 643 passed, 1 deselected, 7 warnings in 2.16s =================
+
+2026-01-16 21:38:42,279 - src.agents.base - INFO - Tool RunTest: ✓
+2026-01-16 21:39:27,660 - src.agents.base - INFO - VerificationAgent - LLM response (1467 chars):
+```json
+{
+    "poc_result": {
+        "passed": true,
+        "vulnerability_fixed": true,
+        "analysis": "The PoC test (fix-run.sh) output shows '9 passed, 2 skipped' for tests/test_uri_validate.py, with no failures or errors. The exit code is 0, and there are no indications of the open redirect vulnerability or any assertion errors. This strongly indicates the vulnerability is fixed."
+    },
+    "regression_result": {
+        "passed": true,
+        "tests_present": true,
+        "analysis": "The unit test suite ran 643 tests (1 deselected), all of which passed. There are no errors, failures, or tracebacks. Only some deprecation warnings are present, which do not indicate functional regressions. This confirms that the patch did not break valid URI handling or introduce regressions."
+    },
+    "overall_verdict": "PASS",
+    "feedback_for_planner": {
+        "issues": [],
+        "suggestions": [],
+        "suspected_cause": "",
+        "output_excerpt": "fix-run.sh: 'tests/test_uri_validate.py ......ss... [100%]'\nunit_test.sh: '================ 643 passed, 1 deselected, 7 warnings in 2.16s ================='"
+    }
+}
+```
+**Summary:**  
+- The strict IPv6address regex patch in `oauthlib/uri_validate.py` successfully fixes the open redirect vulnerability (CVE-2022-36087).
+- All regression/unit tests pass, confirming no breakage of valid URI handling or other regressions.
+- No action is required; the patch is validated and safe to proceed.
+2026-01-16 21:39:27,661 - src.agents.base - INFO - Tool AskAgent: ✓
+2026-01-16 21:39:29,237 - src.agents.base - INFO - CoordinatorAgent - LLM response (446 chars):
+```json
+{
+  "status": "success",
+  "vulnerability": "The IPv6address regex in oauthlib/uri_validate.py was overly permissive, allowing malformed IPv6 addresses (e.g., [::evil.com]) to pass as valid. This could enable open redirect attacks (CWE-601).",
+  "fix": "Replaced the IPv6address regex with a strict RFC3986-compliant pattern, ensuring only valid IPv6 addresses are matched and blocking malicious host components.",
+  "iterations": 1
+}
+```
+2026-01-16 21:39:29,397 - task-CVE-2022-36087-8373870784 - INFO - Extracted patch via /workspace/fix.patch (909 bytes)
+2026-01-16 21:39:29,397 - task-CVE-2022-36087-8373870784 - INFO - Extracted patch via git diff (909 bytes)
+2026-01-16 21:39:29,397 - task-CVE-2022-36087-8373870784 - DEBUG - Extracting edited files from 1 rounds
+2026-01-16 21:39:29,397 - task-CVE-2022-36087-8373870784 - DEBUG - Round 1: no patch_result
+2026-01-16 21:39:29,397 - task-CVE-2022-36087-8373870784 - DEBUG - Total edited files extracted: 0
